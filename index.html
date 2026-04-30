@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fresha · Subscription Quoting Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<style>
+:root {
+  --purple:       #6B4EFF;
+  --purple-dark:  #5538e8;
+  --purple-mid:   #8f78ff;
+  --purple-light: #f0edff;
+  --purple-xl:    #f8f6ff;
+  --ink:          #1a1a1a;
+  --text:         #1a1a1a;
+  --muted:        #6b7280;
+  --border:       #e5e7eb;
+  --bg:           #f5f6fa;
+  --white:        #fff;
+  --warning:      #f59e0b;
+  --warn-bg:      #fffbeb;
+  --warn-bdr:     #fcd34d;
+  --red:          #ef4444;
+  --green-txt:    #15803d;
+  --shadow:       0 1px 6px rgba(0,0,0,0.07);
+  --shadow-md:    0 4px 20px rgba(107,78,255,0.14);
+  --radius:       14px;
+  --rsm:          10px;
+  --pill:         100px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+header {
+  background: var(--white);
+  padding: 0 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-word { font-size: 22px; font-weight: 800; color: var(--purple); letter-spacing: -0.8px; }
+.logo-div  { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+.logo-sub  { font-size: 13px; font-weight: 600; color: var(--muted); }
+.role-badge {
+  background: var(--purple);
+  color: #fff;
+  padding: 5px 16px;
+  border-radius: var(--pill);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.wrap { max-width: 1500px; margin: 0 auto; padding: 24px 36px; }
+
+/* ── Card ───────────────────────────────────────────────────────── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 18px;
+  border: 1px solid var(--border);
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  margin-bottom: 16px;
+}
+
+/* ── Config row ─────────────────────────────────────────────────── */
+.config-row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+.cfg { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 140px; }
+.cfg.wide { flex: 2.5; }
+.cfg label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.cfg input, .cfg select {
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  padding: 9px 13px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  width: 100%;
+}
+.cfg input:focus, .cfg select:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(107,78,255,0.12);
+}
+.region-btns { display: flex; gap: 4px; }
+.rbtn {
+  padding: 8px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--pill);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  background: var(--white);
+  color: var(--muted);
+  transition: all .18s;
+}
+.rbtn.active { border-color: var(--purple); background: var(--purple); color: #fff; }
+
+/* ── Limits reference ───────────────────────────────────────────── */
+.limits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.limit-col-head {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  padding: 6px 10px;
+  text-align: center;
+  background: var(--bg);
+  border-radius: 6px;
+}
+.limit-col-head.active-role {
+  background: var(--purple);
+  color: #fff;
+}
+.limit-items { font-size: 12px; }
+.limit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--bg);
+}
+.limit-item:last-child { border-bottom: none; }
+.limit-name { font-size: 12px; font-weight: 500; color: var(--text); }
+.limit-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+}
+.limit-val.hl { color: var(--purple); }
+.limit-val.zero { color: #d1d5db; }
+
+/* ── Package grid ───────────────────────────────────────────────── */
+.pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 18px;
+}
+@media (max-width: 960px) { .pkg-grid { grid-template-columns: 1fr; } }
+
+/* ── Package card ───────────────────────────────────────────────── */
+.pkg-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.pkg-card.best {
+  border-color: var(--purple);
+  box-shadow: var(--shadow-md);
+}
+
+/* Card header */
+.pkg-head {
+  padding: 13px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.pkg-card.best .pkg-head {
+  background: var(--purple);
+  border-bottom-color: var(--purple-dark);
+}
+.tier-pill {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 3px 10px;
+  border-radius: var(--pill);
+  background: var(--border);
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.pkg-card.best .tier-pill { background: rgba(255,255,255,0.22); color: #fff; }
+.pkg-name-inp {
+  flex: 1;
+  border: none;
+  border-bottom: 2px dashed rgba(0,0,0,0.18);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+  min-width: 0;
+  padding-bottom: 2px;
+  transition: border-color 0.2s;
+  cursor: text;
+}
+.pkg-name-inp:hover  { border-bottom-color: rgba(0,0,0,0.35); }
+.pkg-name-inp:focus  { border-bottom: 2px solid var(--purple); }
+.pkg-card.best .pkg-name-inp { color: #fff; border-bottom-color: rgba(255,255,255,0.35); }
+.pkg-card.best .pkg-name-inp:hover { border-bottom-color: rgba(255,255,255,0.65); }
+.pkg-card.best .pkg-name-inp:focus { border-bottom-color: rgba(255,255,255,0.95); }
+.pkg-card.best .pkg-name-inp::placeholder { color: rgba(255,255,255,.45); }
+
+/* Package visibility toggle */
+.pkg-vis-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--pill);
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.pkg-vis-btn:hover { border-color: var(--purple); color: var(--purple); }
+.pkg-vis-btn.hidden-pkg { border-color: var(--warning); background: var(--warn-bg); color: #92400e; }
+.pkg-card.best .pkg-vis-btn { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); color: rgba(255,255,255,0.8); }
+.pkg-card.best .pkg-vis-btn:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.25); }
+.pkg-card.best .pkg-vis-btn.hidden-pkg { background: rgba(255,200,0,0.2); border-color: rgba(255,200,0,0.6); color: #fde68a; }
+.pkg-card.hidden-card { opacity: 0.55; }
+.pkg-card.hidden-card .pkg-body { pointer-events: none; }
+
+/* Quick-apply strip */
+.pkg-quick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--purple-xl);
+  border-bottom: 1px solid var(--purple-light);
+  flex-wrap: wrap;
+}
+.pkg-quick label { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.pq-input {
+  width: 52px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  background: var(--white);
+}
+.pq-input:focus { border-color: var(--purple); }
+.pq-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: var(--pill);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .15s;
+}
+.pq-all   { background: var(--purple); color: #fff; }
+.pq-all:hover { background: var(--purple-dark); }
+.pq-cap   { background: var(--warn-bg); color: #92400e; border: 1px solid var(--warn-bdr); }
+.pq-cap:hover { background: var(--warn-bdr); }
+.pq-clr   { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.pq-clr:hover { border-color: var(--red); color: var(--red); }
+
+/* Card body */
+.pkg-body { padding: 14px 14px 6px; flex: 1; }
+.sec-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin: 10px 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sec-title:first-child { margin-top: 0; }
+.sec-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Item row */
+.item-row {
+  display: grid;
+  /* [checkbox] [name] [reg] [input] [net] */
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-bottom: 2px;
+  cursor: pointer;
+  transition: background .13s;
+  user-select: none;
+}
+.item-row:hover { background: var(--purple-xl); }
+.item-row .cb-locked { opacity: .45; pointer-events: none; cursor: default; }
+.item-row .required-pill {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--muted); background: var(--border); border-radius: 4px;
+  padding: 1px 5px; margin-left: 4px; flex-shrink: 0;
+}
+.item-row input[type=checkbox] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--purple);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.item-info { min-width: 0; }
+.item-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-detail { font-size: 10px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Pricing cluster — sits on the right */
+.item-pricing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: default;
+  flex-shrink: 0;
+}
+.item-pricing label { cursor: default; }
+
+.price-tag {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 48px;
+  text-align: right;
+}
+.price-tag.reg { color: var(--muted); text-decoration: line-through; font-weight: 400; }
+.price-tag.net { color: var(--purple-dark); font-weight: 800; }
+.price-tag.flat { color: var(--text); }
+
+/* Mini discount chip */
+.disc-chip {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  overflow: visible;
+  width: 86px;
+  flex-shrink: 0;
+}
+.disc-chip.has-disc { border-color: var(--purple-mid); background: var(--purple-xl); }
+.disc-chip.exceeded { border-color: var(--warning); background: var(--warn-bg); }
+.disc-chip input {
+  width: 60px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 3px 2px 3px 6px;
+  outline: none;
+  color: var(--text);
+  text-align: right;
+}
+.disc-chip.exceeded input { color: #92400e; }
+.disc-chip .pct-lbl {
+  font-size: 11px;
+  color: var(--muted);
+  padding-right: 5px;
+  font-weight: 500;
+}
+
+/* Row warning tooltip */
+.max-hint {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--warning);
+  white-space: nowrap;
+  display: none;
+}
+.exceeded-row .max-hint { display: inline; }
+
+/* Card footer */
+.pkg-foot {
+  padding: 12px 16px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+.pkg-card.best .pkg-foot { background: var(--purple-light); border-top-color: #d8d0ff; }
+.foot-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 3px;
+}
+.foot-lbl { font-size: 11px; color: var(--muted); }
+.foot-val { font-size: 14px; font-weight: 700; color: var(--text); }
+.foot-val.big { font-size: 18px; color: var(--purple-dark); }
+.foot-val.strike { font-size: 12px; color: var(--muted); text-decoration: line-through; font-weight: 400; }
+.foot-save {
+  display: inline-block;
+  background: var(--purple);
+  color: #fff;
+  border-radius: var(--pill);
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+/* ── Proposal table ─────────────────────────────────────────────── */
+.tbl-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.tbl-title { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
+.tbl-for   { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.tbl-for span { color: var(--text); font-weight: 600; }
+.act-btns { display: flex; gap: 10px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: var(--pill);
+  font-size: 13px; font-weight: 700; font-family: inherit;
+  cursor: pointer; border: none; transition: all .18s;
+}
+.btn-p  { background: var(--purple); color: #fff; }
+.btn-p:hover { background: var(--purple-dark); box-shadow: 0 4px 12px rgba(107,78,255,.3); }
+.btn-s  { background: var(--white); color: var(--text); border: 1.5px solid var(--border); }
+.btn-s:hover { border-color: var(--purple); color: var(--purple); }
+
+.pt { width: 100%; border-collapse: collapse; }
+.pt thead tr { background: var(--ink); }
+.pt thead th {
+  padding: 13px 18px; text-align: left;
+  font-size: 11px; font-weight: 700; letter-spacing: .6px;
+  text-transform: uppercase; color: rgba(255,255,255,.8);
+}
+.pt thead th:not(:first-child) { text-align: right; }
+.pt tbody tr { border-bottom: 1px solid var(--border); transition: background .12s; }
+.pt tbody tr:last-child { border-bottom: none; }
+.pt tbody tr:hover { background: var(--bg); }
+.pt tbody tr.rec  { background: var(--purple-light); }
+.pt tbody tr.rec:hover { background: #e4dffe; }
+.pt td { padding: 18px 18px; vertical-align: top; }
+.pt td:not(:first-child) { text-align: right; }
+
+.pkg-tag {
+  display: inline-block; padding: 2px 10px; border-radius: var(--pill);
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+}
+.tag-good   { background: #f1f5f9; color: #64748b; }
+.tag-better { background: #eff6ff; color: #3b82f6; }
+.tag-best   { background: var(--purple); color: #fff; }
+.pkg-tname  { font-weight: 800; font-size: 15px; letter-spacing: -.2px; }
+
+.inc-list { list-style: none; }
+.inc-list li {
+  display: flex; align-items: flex-start; gap: 7px;
+  padding: 2px 0; font-size: 13px;
+}
+.inc-list li::before {
+  content: '✓'; color: var(--purple); font-weight: 800;
+  font-size: 11px; flex-shrink: 0; margin-top: 2px;
+}
+
+/* Price cell — no discount */
+.p-main { font-size: 22px; font-weight: 800; letter-spacing: -.5px; display: block; }
+.p-sub  { font-size: 12px; font-weight: 400; color: var(--muted); }
+.p-dash { color: var(--muted); font-size: 14px; }
+
+/* Price cell — with discount (prospect-facing comparison) */
+.p-your-lbl {
+  display: block;
+  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--purple); margin-bottom: 1px;
+}
+.p-offer { font-size: 24px; font-weight: 900; letter-spacing: -.6px; display: block; color: var(--text); }
+.p-offer .p-sub { font-size: 13px; font-weight: 400; color: var(--muted); }
+.p-reg-row {
+  display: block; margin-top: 5px;
+  font-size: 11px; color: var(--muted); font-weight: 500;
+}
+.p-reg-row s { color: #b0b7c3; }
+.p-reg-lbl {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: #b0b7c3; margin-right: 3px;
+}
+.p-save {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--purple); color: #fff;
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: var(--pill); margin-top: 6px;
+}
+.p-save-pct {
+  display: inline-block;
+  background: var(--purple-light); color: var(--purple-dark);
+  font-size: 10px; font-weight: 800; padding: 1px 7px;
+  border-radius: var(--pill); margin-top: 4px; margin-left: 2px;
+}
+
+.notes-area { margin-top: 20px; }
+.notes-area label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; display: block; margin-bottom: 6px; }
+.notes-area textarea {
+  width: 100%; border: 1.5px solid var(--border); border-radius: var(--rsm);
+  padding: 10px 14px; font-size: 13px; font-family: inherit; color: var(--text);
+  background: var(--white); resize: vertical; min-height: 64px; outline: none;
+}
+.notes-area textarea:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(107,78,255,.1); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--ink); color: #fff;
+  padding: 11px 20px; border-radius: var(--rsm);
+  font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  opacity: 0; transform: translateY(8px); transition: all .3s; pointer-events: none; z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px 0 28px; }
+
+/* Print */
+@media print {
+  header, .card:not(.proposal-card), .pkg-grid, .act-btns, footer, .notes-area { display: none !important; }
+  .proposal-card { box-shadow: none !important; border: none !important; padding: 0 !important; }
+  .pt thead tr { background: #1a1a1a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pt tbody tr.rec { background: #f0edff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: white; }
+  .print-show { display: block !important; }
+}
+.print-show { display: none; margin-bottom: 18px; }
+.print-show h1 { font-size: 21px; font-weight: 800; }
+.print-show p  { color: #666; font-size: 13px; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <span class="logo-word">fresha</span>
+    <div class="logo-div"></div>
+    <span class="logo-sub">Quoting Tool</span>
+  </div>
+  <span class="role-badge" id="hdrBadge">IC · Sub max 10%</span>
+</header>
+
+<div class="wrap">
+
+  <!-- Config -->
+  <div class="card">
+    <div class="card-title">Quote Configuration</div>
+    <div class="config-row">
+      <div class="cfg wide">
+        <label>Prospect / Company</label>
+        <input type="text" id="companyName" placeholder="e.g. Luxe Salon Studio" oninput="update()">
+      </div>
+      <div class="cfg">
+        <label>Market</label>
+        <div class="region-btns">
+          <button class="rbtn active" id="btnUSA" onclick="setRegion('USA')">🇺🇸 USA</button>
+          <button class="rbtn" id="btnCAN" onclick="setRegion('CAN')">🇨🇦 Canada</button>
+        </div>
+      </div>
+      <div class="cfg">
+        <label>Staff Count</label>
+        <input type="number" id="staffCount" value="10" min="1" max="999" oninput="update()">
+      </div>
+      <div class="cfg">
+        <label>Your Role</label>
+        <select id="roleSelect" onchange="update()">
+          <option value="IC">IC – Individual Contributor</option>
+          <option value="TL">TL – Team Lead</option>
+          <option value="HO">HO – Head Of</option>
+          <option value="GM">GM – General Manager</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discount limits reference -->
+  <div class="card" id="limitsCard">
+    <div class="card-title">Discount Limits by Role — Reference</div>
+    <div id="limitsBody"></div>
+  </div>
+
+  <!-- Package cards -->
+  <div class="pkg-grid" id="pkgGrid"></div>
+
+  <!-- Proposal table -->
+  <div class="card proposal-card">
+    <div class="print-show">
+      <h1 id="printTitle">Monthly Package Options</h1>
+      <p  id="printSub"></p>
+    </div>
+    <div class="tbl-head">
+      <div>
+        <div class="tbl-title">Monthly Package Options</div>
+        <div class="tbl-for">Prepared for: <span id="prospectLbl">—</span></div>
+      </div>
+      <div class="act-btns">
+        <button class="btn btn-s" onclick="copyTable()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Text
+        </button>
+        <button class="btn btn-s" onclick="downloadPNG()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Save as Image
+        </button>
+        <button class="btn btn-s" onclick="exportPPTX()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+          Export PowerPoint
+        </button>
+        <button class="btn btn-p" onclick="window.print()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / PDF
+        </button>
+      </div>
+    </div>
+
+    <table class="pt">
+      <thead>
+        <tr>
+          <th style="width:16%">Package</th>
+          <th style="width:37%;text-align:left">Included</th>
+          <th style="width:23%">Monthly Cost</th>
+          <th style="width:24%">One-Time Setup</th>
+        </tr>
+      </thead>
+      <tbody id="proposalBody"></tbody>
+    </table>
+
+    <div class="notes-area">
+      <label>Notes / Custom Terms</label>
+      <textarea placeholder="Contract length, payment schedule, special conditions…"></textarea>
+    </div>
+
+    <!-- Discount option lists (hidden, referenced by disc inputs) -->
+    <datalist id="dl-addon">
+      <option value="0">0%</option>
+      <option value="10">10%</option>
+      <option value="20">20%</option>
+      <option value="30">30%</option>
+      <option value="40">40%</option>
+      <option value="50">50%</option>
+    </datalist>
+    <datalist id="dl-onetime-fee">
+      <option value="0">0%</option>
+      <option value="10">10%</option>
+      <option value="20">20%</option>
+      <option value="30">30%</option>
+      <option value="40">40%</option>
+      <option value="50">50%</option>
+      <option value="75">75%</option>
+      <option value="100">100%</option>
+    </datalist>
+  </div>
+
+</div>
+
+<footer>fresha · Subscription Quoting Tool · Confidential Internal Use Only</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════
+
+const PRICING = {
+  USA: {
+    cur:'USD', sym:'$',
+    monthly:{
+      subscription: { name:'Fresha Subscription',  price:14.95, perStaff:true,  detail:'Per bookable team member' },
+      insights:     { name:'Insights',              price:9.95,  perStaff:true,  detail:'Per bookable team member' },
+      loyalty:      { name:'Client Loyalty',        price:59.95,  perStaff:false, detail:'Per location' },
+      aiConcierge:  { name:'AI Concierge',          price:99.95,  perStaff:false, detail:'Per location' },
+      googleBoost:  { name:'Google Rating Boost',   price:14.95,  perStaff:false, detail:'Per location' },
+      dataConnector:{ name:'Data Connector',        price:295,   perStaff:false, detail:'Per location' },
+    },
+    onetime:{
+      accountSetup: { name:'Account Setup',            price:199 },
+      essentialMig: { name:'Essential Data Migration', price:449 },
+      terminalS1F2: { name:'Terminal – S1F2',          price:499 },
+      terminalAMS1: { name:'Terminal – AMS1',          price:179 },
+      photoshoot:   { name:'Photoshoot (1 Hour)',       price:169 },
+    }
+  },
+  CAN: {
+    cur:'CAD', sym:'CA$',
+    monthly:{
+      subscription: { name:'Fresha Subscription',  price:19.95, perStaff:true,  detail:'Per bookable team member' },
+      insights:     { name:'Insights',              price:13.95, perStaff:true,  detail:'Per bookable team member' },
+      loyalty:      { name:'Client Loyalty',        price:79.95,  perStaff:false, detail:'Per location' },
+      aiConcierge:  { name:'AI Concierge',          price:139.95, perStaff:false, detail:'Per location' },
+      googleBoost:  { name:'Google Rating Boost',   price:20.95,  perStaff:false, detail:'Per location' },
+      dataConnector:{ name:'Data Connector',        price:295,   perStaff:false, detail:'Per location' },
+    },
+    onetime:{
+      accountSetup: { name:'Account Setup',            price:249 },
+      essentialMig: { name:'Essential Data Migration', price:549 },
+      terminalS1F2: { name:'Terminal – S1F2',          price:549 },
+      terminalAMS1: { name:'Terminal – AMS1',          price:249 },
+      photoshoot:   { name:'Photoshoot (1 Hour)',       price:209 },
+    }
+  }
+};
+
+// Per-item role discount ceilings (%)
+const LIMITS = {
+  subscription: { IC:10, TL:20, HO:30, GM:40  },
+  insights:     { IC:20, TL:30, HO:40, GM:50  },
+  loyalty:      { IC:20, TL:30, HO:40, GM:50  },
+  aiConcierge:  { IC:20, TL:30, HO:40, GM:50  },
+  googleBoost:  { IC:20, TL:30, HO:40, GM:50  },
+  dataConnector:{ IC:20, TL:30, HO:40, GM:50  },
+  accountSetup: { IC:20, TL:30, HO:30, GM:100 },
+  essentialMig: { IC:20, TL:30, HO:30, GM:100 },
+  terminalS1F2: { IC:50, TL:75, HO:75, GM:100 },
+  terminalAMS1: { IC:50, TL:75, HO:75, GM:100 },
+  photoshoot:   { IC:0,  TL:0,  HO:0,  GM:0   },
+};
+
+// Datalist ids per item: 'addon' | 'onetime-fee' | 'none' | null (plain input)
+const DISC_LIST = {
+  subscription:  null,
+  insights:      'dl-addon',
+  loyalty:       'dl-addon',
+  aiConcierge:   'dl-addon',
+  googleBoost:   'dl-addon',
+  dataConnector: 'dl-addon',
+  accountSetup:  'dl-onetime-fee',
+  essentialMig:  'dl-onetime-fee',
+  terminalS1F2:  'dl-onetime-fee',
+  terminalAMS1:  'dl-onetime-fee',
+  photoshoot:    'none',
+};
+
+// Friendly display names for limits table
+const LIMIT_LABELS = [
+  { label:'Team Subscription',  key:'subscription'  },
+  { label:'Insights',           key:'insights'       },
+  { label:'Client Loyalty',     key:'loyalty'        },
+  { label:'AI Concierge',       key:'aiConcierge'    },
+  { label:'Google Rating Boost',key:'googleBoost'    },
+  { label:'Data Connector',     key:'dataConnector'  },
+  { label:'Account Setup',      key:'accountSetup'   },
+  { label:'Data Migration',     key:'essentialMig'   },
+  { label:'Terminals (S1F2/AMS1)', key:'terminalS1F2' },
+  { label:'Photoshoot',         key:'photoshoot'     },
+];
+
+// Factory for a fresh discounts object (all zeros)
+function freshDiscs() {
+  return {
+    subscription:0, insights:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0,
+    accountSetup:0, essentialMig:0, terminalS1F2:0, terminalAMS1:0, photoshoot:0,
+  };
+}
+
+// ── State ──────────────────────────────────────────────────────────
+let region = 'USA';
+
+// Each package has its own discounts object
+let pkgState = [
+  {
+    name:'Fully Loaded', tier:'best', tierLabel:'Best', visible:true,
+    monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, googleBoost:false, dataConnector:false },
+    onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
+    discounts: freshDiscs(),
+  },
+  {
+    name:'Loyalty & Growth', tier:'better', tierLabel:'Better', visible:true,
+    monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, googleBoost:false, dataConnector:false },
+    onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
+    discounts: freshDiscs(),
+  },
+  {
+    name:'Basic', tier:'good', tierLabel:'Good', visible:true,
+    monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, googleBoost:false, dataConnector:false },
+    onetime: { accountSetup:true,  essentialMig:false, terminalS1F2:false, terminalAMS1:false, photoshoot:false },
+    discounts: freshDiscs(),
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════
+
+function staff()    { return Math.max(1, parseInt(document.getElementById('staffCount').value) || 1); }
+function role()     { return document.getElementById('roleSelect').value; }
+function sym()      { return PRICING[region].sym; }
+function lim(key)   { return (LIMITS[key]||{})[role()] ?? 0; }
+
+function regM(key, s) {
+  const m = PRICING[region].monthly[key];
+  return m.perStaff ? m.price * s : m.price;
+}
+function netM(key, s, pkg) {
+  return regM(key, s) * (1 - (pkg.discounts[key] || 0) / 100);
+}
+function regO(key)  { return PRICING[region].onetime[key].price; }
+function netO(key, pkg) {
+  return regO(key) * (1 - (pkg.discounts[key] || 0) / 100);
+}
+
+function fmt(n) {
+  return sym() + n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+function pkgTotals(pkg, s) {
+  let rM=0, nM=0, rO=0, nO=0;
+  Object.keys(PRICING[region].monthly).forEach(k => {
+    if (pkg.monthly[k]) { rM += regM(k,s); nM += netM(k,s,pkg); }
+  });
+  Object.keys(PRICING[region].onetime).forEach(k => {
+    if (pkg.onetime[k]) { rO += regO(k); nO += netO(k,pkg); }
+  });
+  return { rM, nM, rO, nO };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// REGION
+// ═══════════════════════════════════════════════════════════════════
+
+function setRegion(r) {
+  region = r;
+  document.getElementById('btnUSA').classList.toggle('active', r==='USA');
+  document.getElementById('btnCAN').classList.toggle('active', r==='CAN');
+  update();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DISCOUNT LIMITS REFERENCE TABLE
+// ═══════════════════════════════════════════════════════════════════
+
+function buildLimitsRef() {
+  const r = role();
+  const roles = ['IC','TL','HO','GM'];
+
+  let html = `<div style="display:grid;grid-template-columns:1fr repeat(4,80px);gap:6px;align-items:center;">`;
+  // Headers
+  html += `<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;">Item</div>`;
+  roles.forEach(ro => {
+    const active = ro === r;
+    html += `<div style="font-size:11px;font-weight:700;text-align:center;padding:5px;border-radius:6px;
+      background:${active ? 'var(--purple)' : 'var(--bg)'};color:${active ? '#fff' : 'var(--muted)'};
+      text-transform:uppercase;letter-spacing:.6px;">${ro}</div>`;
+  });
+  // Rows
+  LIMIT_LABELS.forEach(({label, key}) => {
+    html += `<div style="font-size:12px;font-weight:500;padding:4px 0;border-top:1px solid var(--bg);">${label}</div>`;
+    roles.forEach(ro => {
+      const v = (LIMITS[key]||{})[ro] ?? 0;
+      const active = ro === r;
+      const clr = v === 0 ? '#d1d5db' : (active ? 'var(--purple)' : 'var(--text)');
+      const fw  = active ? '800' : '600';
+      html += `<div style="font-size:12px;font-weight:${fw};color:${clr};text-align:center;
+        padding:4px;border-top:1px solid var(--bg);border-radius:4px;
+        ${active ? 'background:var(--purple-xl);' : ''}">${v === 0 ? '—' : v + '%'}</div>`;
+    });
+  });
+  html += `</div>`;
+  document.getElementById('limitsBody').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PACKAGE CARDS
+// ═══════════════════════════════════════════════════════════════════
+
+function buildPkgCards() {
+  const grid = document.getElementById('pkgGrid');
+  grid.innerHTML = '';
+  const s = staff();
+
+  pkgState.forEach((pkg, idx) => {
+    const isBest = pkg.tier === 'best';
+
+    // ── Monthly items ──
+    let mHtml = '';
+    Object.entries(PRICING[region].monthly).forEach(([key, item]) => {
+      const isLocked = key === 'subscription';
+      const checked  = pkg.monthly[key];
+      const d        = pkg.discounts[key] || 0;
+      const limit    = lim(key);
+      const exceeded = d > limit && limit > 0;
+
+      const rP = regM(key, s);
+      const nP = netM(key, s, pkg);
+      const hasDisc = d > 0;
+
+      // Price display
+      const priceHtml = hasDisc
+        ? `<span class="price-tag reg">${fmt(rP)}</span><span class="price-tag net">${fmt(nP)}</span>`
+        : `<span class="price-tag flat">${fmt(rP)}</span>`;
+
+      const chipCls = exceeded ? 'disc-chip exceeded' : (hasDisc ? 'disc-chip has-disc' : 'disc-chip');
+      const maxNote = exceeded ? `<span style="font-size:9px;color:var(--warning);font-weight:700;padding-left:2px;">max ${limit}%</span>` : '';
+      const dlId    = DISC_LIST[key];
+      const listAttr = dlId && dlId !== 'none' ? `list="${dlId}"` : '';
+
+      mHtml += `
+        <label class="item-row">
+          <input type="checkbox" ${checked ? 'checked' : ''} ${isLocked ? 'disabled' : ''}
+            class="${isLocked ? 'cb-locked' : ''}"
+            onchange="toggleItem(${idx},'monthly','${key}',this.checked)" onclick="event.stopPropagation()">
+          <div class="item-info">
+            <div class="item-name">${item.name}${isLocked ? '<span class="required-pill">Required</span>' : ''}</div>
+            <div class="item-detail">${item.detail}${item.perStaff ? ' · ×'+s : ''}${hasDisc ? ' · <b style="color:var(--purple-dark)">'+d+'% off</b>' : ''}</div>
+          </div>
+          <div class="item-pricing" onclick="event.stopPropagation()">
+            ${priceHtml}
+            <div class="${chipCls}">
+              <input type="text" inputmode="numeric" ${listAttr}
+                value="${d > 0 ? d : ''}" placeholder="0"
+                title="Max for ${role()}: ${limit}%"
+                oninput="setItemDisc(${idx},'${key}',this.value)">
+              <span class="pct-lbl">%</span>
+            </div>
+            ${maxNote}
+          </div>
+        </label>`;
+    });
+
+    // ── One-time items ──
+    let oHtml = '';
+    Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
+      const checked  = pkg.onetime[key];
+      const d        = pkg.discounts[key] || 0;
+      const limit    = lim(key);
+      const exceeded = d > limit && limit > 0;
+
+      const rP = regO(key);
+      const nP = netO(key, pkg);
+      const hasDisc = d > 0;
+
+      const priceHtml = hasDisc
+        ? `<span class="price-tag reg">${fmt(rP)}</span><span class="price-tag net">${fmt(nP)}</span>`
+        : `<span class="price-tag flat">${fmt(rP)}</span>`;
+
+      const dlId    = DISC_LIST[key];
+      const noDisc  = dlId === 'none';
+      const chipCls = exceeded ? 'disc-chip exceeded' : (hasDisc ? 'disc-chip has-disc' : 'disc-chip');
+      const maxNote = exceeded ? `<span style="font-size:9px;color:var(--warning);font-weight:700;padding-left:2px;">max ${limit}%</span>` : '';
+      const listAttr = dlId && !noDisc ? `list="${dlId}"` : '';
+
+      oHtml += `
+        <label class="item-row">
+          <input type="checkbox" ${checked ? 'checked' : ''}
+            onchange="toggleItem(${idx},'onetime','${key}',this.checked)" onclick="event.stopPropagation()">
+          <div class="item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-detail">One-time fee${hasDisc && !noDisc ? ' · <b style="color:var(--purple-dark)">'+d+'% off</b>' : ''}</div>
+          </div>
+          <div class="item-pricing" onclick="event.stopPropagation()">
+            ${priceHtml}
+            ${noDisc ? '' : `<div class="${chipCls}">
+              <input type="text" inputmode="numeric" ${listAttr}
+                value="${d > 0 ? d : ''}" placeholder="0"
+                title="Max for ${role()}: ${limit}%"
+                oninput="setItemDisc(${idx},'${key}',this.value)">
+              <span class="pct-lbl">%</span>
+            </div>
+            ${maxNote}`}
+          </div>
+        </label>`;
+    });
+
+    // ── Totals ──
+    const { rM: totalRegM, nM: totalNetM, rO: totalRegO, nO: totalNetO } = pkgTotals(pkg, s);
+    const mSave  = totalRegM - totalNetM;
+    const anyMD  = totalNetM < totalRegM - 0.001;
+    const anyOD  = totalNetO < totalRegO - 0.001;
+
+    let footHtml = `<div class="pkg-foot">`;
+    if (anyMD) {
+      footHtml += `
+        <div class="foot-row"><span class="foot-lbl">Monthly (regular)</span><span class="foot-val strike">${fmt(totalRegM)}/mo</span></div>
+        <div class="foot-row"><span class="foot-lbl">Monthly (discounted)</span><span class="foot-val big">${fmt(totalNetM)}/mo</span></div>`;
+    } else {
+      footHtml += `<div class="foot-row"><span class="foot-lbl">Monthly</span><span class="foot-val big">${fmt(totalRegM)}/mo</span></div>`;
+    }
+    if (anyOD) {
+      footHtml += `
+        <div class="foot-row" style="margin-top:5px"><span class="foot-lbl">One-time (regular)</span><span class="foot-val strike">${fmt(totalRegO)}</span></div>
+        <div class="foot-row"><span class="foot-lbl">One-time (discounted)</span><span class="foot-val">${fmt(totalNetO)}</span></div>`;
+    } else if (totalRegO > 0) {
+      footHtml += `<div class="foot-row" style="margin-top:5px"><span class="foot-lbl">One-time</span><span class="foot-val">${fmt(totalRegO)}</span></div>`;
+    }
+    if (mSave > 0.01) footHtml += `<span class="foot-save">Saves ${fmt(mSave)}/mo</span>`;
+    footHtml += `</div>`;
+
+    const card = document.createElement('div');
+    card.className = 'pkg-card' + (isBest ? ' best' : '') + (pkg.visible === false ? ' hidden-card' : '');
+    const visLabel = pkg.visible === false ? '🚫 Hidden' : '✓ Show';
+    const visCls   = pkg.visible === false ? 'pkg-vis-btn hidden-pkg' : 'pkg-vis-btn';
+    card.innerHTML = `
+      <div class="pkg-head">
+        <span class="tier-pill">${pkg.tierLabel}</span>
+        <input class="pkg-name-inp" type="text" value="${pkg.name}" placeholder="Package Name"
+          oninput="pkgState[${idx}].name=this.value; buildProposalTable()">
+        <svg style="flex-shrink:0;opacity:0.35;${isBest?'filter:brightness(10)':''}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <button class="${visCls}" onclick="togglePkgVisible(${idx})" title="Toggle whether this package appears in the proposal table">${visLabel}</button>
+      </div>
+      <!-- Quick-apply strip -->
+      <div class="pkg-quick">
+        <label>Quick:</label>
+        <div style="position:relative;display:flex;align-items:center;">
+          <input class="pq-input" type="number" id="pq${idx}" min="0" max="100" placeholder="%">
+        </div>
+        <button class="pq-btn pq-all" onclick="quickApplyPkg(${idx},false)">All items</button>
+        <button class="pq-btn pq-cap" onclick="quickApplyPkg(${idx},true)">Cap at max</button>
+        <button class="pq-btn pq-clr" onclick="clearPkg(${idx})">Clear</button>
+      </div>
+      <div class="pkg-body">
+        <div class="sec-title">Monthly</div>${mHtml}
+        <div class="sec-title">One-Time Setup</div>${oHtml}
+      </div>
+      ${footHtml}`;
+    grid.appendChild(card);
+  });
+}
+
+// ── Mutations ──────────────────────────────────────────────────────
+
+function toggleItem(idx, section, key, checked) {
+  pkgState[idx][section][key] = checked;
+  buildPkgCards();
+  buildProposalTable();
+}
+
+function setItemDisc(idx, key, val) {
+  pkgState[idx].discounts[key] = parseFloat(val) || 0;
+  // Partial refresh: just update footer + proposal table to avoid losing focus
+  refreshPkgFooter(idx);
+  buildProposalTable();
+}
+
+// Refresh just the footer of a package card (avoids full rebuild on each keystroke)
+function refreshPkgFooter(idx) {
+  const s = staff();
+  const pkg = pkgState[idx];
+  const { rM, nM, rO, nO } = pkgTotals(pkg, s);
+  const mSave = rM - nM;
+  const anyMD = nM < rM - 0.001;
+  const anyOD = nO < rO - 0.001;
+
+  const cards = document.querySelectorAll('.pkg-card');
+  if (!cards[idx]) return;
+  let foot = cards[idx].querySelector('.pkg-foot');
+  if (!foot) return;
+
+  let html = '';
+  if (anyMD) {
+    html += `<div class="foot-row"><span class="foot-lbl">Monthly (regular)</span><span class="foot-val strike">${fmt(rM)}/mo</span></div>
+             <div class="foot-row"><span class="foot-lbl">Monthly (discounted)</span><span class="foot-val big">${fmt(nM)}/mo</span></div>`;
+  } else {
+    html += `<div class="foot-row"><span class="foot-lbl">Monthly</span><span class="foot-val big">${fmt(rM)}/mo</span></div>`;
+  }
+  if (anyOD) {
+    html += `<div class="foot-row" style="margin-top:5px"><span class="foot-lbl">One-time (regular)</span><span class="foot-val strike">${fmt(rO)}</span></div>
+             <div class="foot-row"><span class="foot-lbl">One-time (discounted)</span><span class="foot-val">${fmt(nO)}</span></div>`;
+  } else if (rO > 0) {
+    html += `<div class="foot-row" style="margin-top:5px"><span class="foot-lbl">One-time</span><span class="foot-val">${fmt(rO)}</span></div>`;
+  }
+  if (mSave > 0.01) html += `<span class="foot-save">Saves ${fmt(mSave)}/mo</span>`;
+  foot.innerHTML = html;
+}
+
+function quickApplyPkg(idx, cap) {
+  const pct = parseFloat(document.getElementById('pq' + idx).value) || 0;
+  Object.keys(pkgState[idx].discounts).forEach(k => {
+    pkgState[idx].discounts[k] = cap ? Math.min(pct, lim(k)) : pct;
+  });
+  buildPkgCards();
+  buildProposalTable();
+}
+
+function clearPkg(idx) {
+  pkgState[idx].discounts = freshDiscs();
+  document.getElementById('pq' + idx).value = '';
+  buildPkgCards();
+  buildProposalTable();
+}
+
+function togglePkgVisible(idx) {
+  pkgState[idx].visible = pkgState[idx].visible === false ? true : false;
+  buildPkgCards();
+  buildProposalTable();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PROPOSAL TABLE
+// ═══════════════════════════════════════════════════════════════════
+
+function buildProposalTable() {
+  const s = staff();
+  const tbody = document.getElementById('proposalBody');
+  const tagCls = { good:'tag-good', better:'tag-better', best:'tag-best' };
+  const ordered = [...pkgState]
+    .filter(p => p.visible !== false)
+    .sort((a,b) => ({best:0,better:1,good:2}[a.tier] - {best:0,better:1,good:2}[b.tier]));
+
+  let html = '';
+  ordered.forEach(pkg => {
+    const { rM, nM, rO, nO } = pkgTotals(pkg, s);
+    const mSave = rM - nM;
+    const oSave = rO - nO;
+    const anyMD = nM < rM - 0.001;
+    const anyOD = nO < rO - 0.001;
+
+    // Included list
+    let inc = '<ul class="inc-list">';
+    Object.entries(PRICING[region].monthly).forEach(([key, item]) => {
+      if (!pkg.monthly[key]) return;
+      const d  = pkg.discounts[key] || 0;
+      const de = item.perStaff ? ` – ${s} staff` : '';
+      const dn = d > 0
+        ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">(${d}% off)</span>` : '';
+      inc += `<li>${item.name}${de}${dn}</li>`;
+    });
+    Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
+      if (!pkg.onetime[key]) return;
+      const d  = pkg.discounts[key] || 0;
+      const dn = d > 0
+        ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">(${d}% off)</span>` : '';
+      inc += `<li>${item.name} <span style="color:var(--muted);font-size:11px">(one-time)</span>${dn}</li>`;
+    });
+    inc += '</ul>';
+
+    // Monthly cell — always shows both Your Price and Regular Price
+    const mSavePct = rM > 0 ? Math.round((mSave / rM) * 100) : 0;
+    const mCell = anyMD
+      ? `<span class="p-your-lbl">Your price</span>
+         <span class="p-offer">${fmt(nM)}<span class="p-sub">/mo</span></span>
+         <span class="p-reg-row"><span class="p-reg-lbl">Regular price</span> <s>${fmt(rM)}/mo</s></span>
+         <span class="p-save">You save ${fmt(mSave)}/mo</span>
+         <span class="p-save-pct">${mSavePct}% off</span>`
+      : `<span class="p-your-lbl">Your price</span>
+         <span class="p-offer">${fmt(rM)}<span class="p-sub">/mo</span></span>`;
+
+    // One-time cell — always shows both Your Price and Regular Price
+    const oSavePct = rO > 0 ? Math.round((oSave / rO) * 100) : 0;
+    let oCell = '';
+    if (rO === 0) {
+      oCell = `<span class="p-dash">—</span>`;
+    } else if (anyOD) {
+      oCell = `<span class="p-your-lbl">Your price</span>
+               <span class="p-offer">${fmt(nO)}</span>
+               <span class="p-reg-row"><span class="p-reg-lbl">Regular price</span> <s>${fmt(rO)}</s></span>
+               <span class="p-save">You save ${fmt(oSave)}</span>
+               <span class="p-save-pct">${oSavePct}% off</span>`;
+    } else {
+      oCell = `<span class="p-your-lbl">Your price</span>
+               <span class="p-offer">${fmt(rO)}</span>`;
+    }
+
+    html += `
+      <tr class="${pkg.tier==='best' ? 'rec' : ''}">
+        <td>
+          <span class="pkg-tag ${tagCls[pkg.tier]}">${pkg.tierLabel}</span><br>
+          <span class="pkg-tname">${pkg.name || '—'}</span>
+        </td>
+        <td>${inc}</td>
+        <td>${mCell}</td>
+        <td>${oCell}</td>
+      </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COPY
+// ═══════════════════════════════════════════════════════════════════
+
+function copyTable() {
+  const s = staff();
+  const name = document.getElementById('companyName').value.trim();
+  const ordered = [...pkgState]
+    .filter(p => p.visible !== false)
+    .sort((a,b) => ({best:0,better:1,good:2}[a.tier] - {best:0,better:1,good:2}[b.tier]));
+
+  let txt = `MONTHLY PACKAGE OPTIONS${name ? ' — '+name.toUpperCase() : ''}\n${'─'.repeat(65)}\n`;
+  ordered.forEach(pkg => {
+    const { rM, nM, rO, nO } = pkgTotals(pkg, s);
+    txt += `\n[${pkg.tierLabel.toUpperCase()}] ${pkg.name}\nIncluded:\n`;
+    Object.entries(PRICING[region].monthly).forEach(([key, item]) => {
+      if (!pkg.monthly[key]) return;
+      const d = pkg.discounts[key] || 0;
+      txt += `  • ${item.name}${item.perStaff ? ` (${s} staff)` : ''}${d>0 ? ` — ${d}% off` : ''}\n`;
+    });
+    Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
+      if (!pkg.onetime[key]) return;
+      const d = pkg.discounts[key] || 0;
+      txt += `  • ${item.name} (one-time)${d>0 ? ` — ${d}% off` : ''}\n`;
+    });
+    txt += `Monthly: ${fmt(rM)}/mo${nM < rM-0.001 ? ` → ${fmt(nM)}/mo (discounted)` : ''}\n`;
+    txt += `One-Time: ${rO > 0 ? fmt(nO < rO-0.001 ? nO : rO) : '—'}\n${'─'.repeat(65)}\n`;
+  });
+  navigator.clipboard.writeText(txt).then(() => showToast('✓ Table copied to clipboard'));
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// EXPORT — PNG (paste-into-Slides as image)
+// ═══════════════════════════════════════════════════════════════════
+
+// Shared capture helper: hides buttons, renders notes as clean text
+async function captureProposalCard() {
+  const card     = document.querySelector('.proposal-card');
+  const notesArea = card.querySelector('.notes-area');
+  const textarea  = notesArea?.querySelector('textarea');
+  const notesText = textarea?.value.trim() || '';
+
+  // Hide export buttons
+  const hideBtns = [...card.querySelectorAll('.act-btns')];
+  hideBtns.forEach(el => el.style.visibility = 'hidden');
+
+  // Notes: show plain text if content exists, hide the section if empty
+  let notesPlain = null;
+  if (notesArea) {
+    if (notesText) {
+      textarea.style.display = 'none';
+      notesPlain = document.createElement('p');
+      notesPlain.style.cssText = 'margin:0;font-size:13px;color:#1a1a1a;font-family:inherit;line-height:1.6;white-space:pre-wrap;padding-top:2px;';
+      notesPlain.textContent = notesText;
+      notesArea.appendChild(notesPlain);
+    } else {
+      notesArea.style.display = 'none';
+    }
+  }
+
+  try {
+    const canvas = await html2canvas(card, {
+      scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false,
+    });
+    return canvas.toDataURL('image/png');
+  } finally {
+    hideBtns.forEach(el => el.style.visibility = '');
+    if (notesArea) {
+      if (notesText && textarea) {
+        textarea.style.display = '';
+        if (notesPlain) notesArea.removeChild(notesPlain);
+      } else {
+        notesArea.style.display = '';
+      }
+    }
+  }
+}
+
+async function downloadPNG() {
+  const name   = document.getElementById('companyName').value.trim();
+  const dataUrl = await captureProposalCard();
+  const link    = document.createElement('a');
+  link.download  = (name ? name.replace(/[^a-z0-9]/gi,'_') + '_' : '') + 'fresha_packages.png';
+  link.href      = dataUrl;
+  link.click();
+  showToast('✓ Image downloaded — insert into Google Slides via Insert → Image');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// EXPORT — PPTX (import into Google Slides via File → Import Slides)
+// ═══════════════════════════════════════════════════════════════════
+
+// Builds an off-screen element for the one-time setup details slide
+function buildSetupDetailsEl(s, name) {
+  const ordered = [...pkgState]
+    .filter(p => p.visible !== false)
+    .sort((a,b) => ({best:0,better:1,good:2}[a.tier] - {best:0,better:1,good:2}[b.tier]));
+
+  const colPct = Math.round(65 / (ordered.length || 1));
+
+  let thead = `<tr style="background:#1a1a1a;">
+    <th style="padding:13px 18px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.8);width:35%">Setup Item</th>`;
+  ordered.forEach(pkg => {
+    const tl = pkg.tier === 'best' ? '★ Best' : pkg.tier === 'better' ? 'Better' : 'Good';
+    thead += `<th style="padding:13px 18px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.8);width:${colPct}%">
+      <span style="font-size:9px;font-weight:700;color:${pkg.tier==='best'?'#b4a7ff':'#888'};display:block;margin-bottom:2px;">${tl}</span>
+      ${pkg.name || '—'}
+    </th>`;
+  });
+  thead += `</tr>`;
+
+  let tbody = '';
+  let rowIdx = 0;
+  Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
+    if (!ordered.some(pkg => pkg.onetime[key])) return;
+    const bg = rowIdx % 2 === 0 ? '#f9fafb' : '#ffffff';
+    rowIdx++;
+    tbody += `<tr style="border-bottom:1px solid #e5e7eb;">
+      <td style="background:${bg};padding:14px 18px;vertical-align:middle;">
+        <div style="font-size:13px;font-weight:700;color:#1a1a1a;">${item.name}</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:2px;">One-time fee</div>
+      </td>`;
+    ordered.forEach(pkg => {
+      const cellBg = pkg.tier === 'best' ? '#f0edff' : bg;
+      if (!pkg.onetime[key]) {
+        tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;font-size:22px;color:#d1d5db;">—</td>`;
+        return;
+      }
+      const d  = pkg.discounts[key] || 0;
+      const rP = regO(key);
+      const nP = netO(key, pkg);
+      if (d > 0) {
+        tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;">
+          <div style="font-size:9px;font-weight:700;color:#6B4EFF;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Your price</div>
+          <div style="font-size:20px;font-weight:800;color:#1a1a1a;">${fmt(nP)}</div>
+          <div style="font-size:11px;color:#9ca3af;text-decoration:line-through;margin-top:1px;">Regular: ${fmt(rP)}</div>
+          <div style="font-size:11px;font-weight:700;color:#6B4EFF;margin-top:2px;">${d}% off · save ${fmt(rP - nP)}</div>
+        </td>`;
+      } else {
+        tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;">
+          <div style="font-size:9px;font-weight:700;color:#6B4EFF;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Your price</div>
+          <div style="font-size:20px;font-weight:800;color:#1a1a1a;">${fmt(rP)}</div>
+        </td>`;
+      }
+    });
+    tbody += `</tr>`;
+  });
+
+  // Totals row
+  tbody += `<tr>
+    <td style="background:#f3f4f6;padding:14px 18px;vertical-align:middle;font-size:12px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:.5px;border-top:2px solid #e5e7eb;">Total One-Time Setup</td>`;
+  ordered.forEach(pkg => {
+    const { rO: tRO, nO: tNO } = pkgTotals(pkg, s);
+    const cellBg  = pkg.tier === 'best' ? '#e8e3ff' : '#f3f4f6';
+    const hasOD   = tNO < tRO - 0.001;
+    if (tRO === 0) {
+      tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;font-size:18px;color:#9ca3af;border-top:2px solid #e5e7eb;">—</td>`;
+    } else if (hasOD) {
+      tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;border-top:2px solid #e5e7eb;">
+        <div style="font-size:20px;font-weight:800;color:#1a1a1a;">${fmt(tNO)}</div>
+        <div style="font-size:11px;color:#9ca3af;text-decoration:line-through;margin-top:1px;">Regular: ${fmt(tRO)}</div>
+      </td>`;
+    } else {
+      tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;font-size:20px;font-weight:800;color:#1a1a1a;border-top:2px solid #e5e7eb;">${fmt(tRO)}</td>`;
+    }
+  });
+  tbody += `</tr>`;
+
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;left:-9999px;top:0;width:1200px;background:#ffffff;font-family:Inter,Arial,sans-serif;border-radius:12px;overflow:hidden;';
+  div.innerHTML = `
+    <div style="padding:22px 24px 18px;border-bottom:1px solid #e5e7eb;background:#fff;">
+      <div style="font-size:22px;font-weight:800;color:#1a1a1a;line-height:1.2;">One-Time Setup Details</div>
+      ${name ? `<div style="font-size:13px;color:#6b7280;margin-top:4px;">Prepared for: <strong style="color:#1a1a1a;">${name}</strong></div>` : ''}
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>${thead}</thead>
+      <tbody>${tbody}</tbody>
+    </table>`;
+  return div;
+}
+
+async function exportPPTX() {
+  const s    = staff();
+  const name = document.getElementById('companyName').value.trim();
+
+  showToast('⏳ Building slides…');
+
+  // ── Capture slide 1: proposal card (shared helper — no buttons, clean notes) ──
+  const img1 = await captureProposalCard();
+
+  // ── Capture slide 2: off-screen one-time details element ─────────
+  const el2 = buildSetupDetailsEl(s, name);
+  document.body.appendChild(el2);
+  let img2;
+  try {
+    const c2 = await html2canvas(el2, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+    img2 = c2.toDataURL('image/png');
+  } finally {
+    document.body.removeChild(el2);
+  }
+
+  // ── Build PPTX — embed both slides as images ────────────────────
+  const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE';   // 13.33" × 7.5"
+  pptx.author = 'fresha Quoting Tool';
+
+  // Slide 1 — proposal table (pixel-perfect screenshot)
+  const slide1 = pptx.addSlide();
+  slide1.background = { color: 'FFFFFF' };
+  slide1.addImage({ data: img1, x: 0, y: 0, w: '100%', h: '100%',
+    sizing: { type: 'contain', align: 'center', valign: 'top' } });
+
+  // Slide 2 — one-time setup details (pixel-perfect screenshot)
+  const slide2 = pptx.addSlide();
+  slide2.background = { color: 'FFFFFF' };
+  slide2.addImage({ data: img2, x: 0, y: 0, w: '100%', h: '100%',
+    sizing: { type: 'contain', align: 'center', valign: 'top' } });
+
+  const fname = 'Fresha Partnership Proposal' + (name ? ' - ' + name : '') + '.pptx';
+  pptx.writeFile({ fileName: fname });
+  showToast('✓ PowerPoint saved — open Google Slides → File → Import Slides');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAIN UPDATE
+// ═══════════════════════════════════════════════════════════════════
+
+function update() {
+  const name = document.getElementById('companyName').value.trim();
+  document.getElementById('prospectLbl').textContent = name || '—';
+  document.getElementById('prospectLbl').style.fontWeight = name ? '600' : '400';
+  document.getElementById('printTitle').textContent = `Monthly Package Options${name ? ' for '+name : ''}`;
+  document.getElementById('printSub').textContent =
+    `Prepared by fresha · ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}`;
+
+  const r = role();
+  document.getElementById('hdrBadge').textContent = `${r} · Sub max ${LIMITS.subscription[r]}%`;
+
+  buildLimitsRef();
+  buildPkgCards();
+  buildProposalTable();
+}
+
+update();
+</script>
+</body>
+</html>

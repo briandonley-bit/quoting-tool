@@ -603,6 +603,10 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
         <input type="number" id="staffCount" value="10" min="1" max="999" oninput="update()">
       </div>
       <div class="cfg">
+        <label>Locations</label>
+        <input type="number" id="locationCount" value="1" min="1" max="999" oninput="update()">
+      </div>
+      <div class="cfg">
         <label>Your Role</label>
         <select id="roleSelect" onchange="update()">
           <option value="IC">IC – Individual Contributor</option>
@@ -708,10 +712,10 @@ const PRICING = {
     monthly:{
       subscription: { name:'Fresha Subscription',  price:14.95, perStaff:true,  detail:'Per bookable team member' },
       insights:     { name:'Insights',              price:9.95,  perStaff:true,  detail:'Per bookable team member' },
-      loyalty:      { name:'Client Loyalty',        price:59.95,  perStaff:false, detail:'Per location' },
-      aiConcierge:  { name:'AI Concierge',          price:99.95,  perStaff:false, detail:'Per location' },
-      googleBoost:  { name:'Google Rating Boost',   price:14.95,  perStaff:false, detail:'Per location' },
-      dataConnector:{ name:'Data Connector',        price:295,   perStaff:false, detail:'Per location' },
+      loyalty:      { name:'Client Loyalty',        price:59.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      aiConcierge:  { name:'AI Concierge',          price:99.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      googleBoost:  { name:'Google Rating Boost',   price:14.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      dataConnector:{ name:'Data Connector',        price:295,    perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:199 },
@@ -726,10 +730,10 @@ const PRICING = {
     monthly:{
       subscription: { name:'Fresha Subscription',  price:19.95, perStaff:true,  detail:'Per bookable team member' },
       insights:     { name:'Insights',              price:13.95, perStaff:true,  detail:'Per bookable team member' },
-      loyalty:      { name:'Client Loyalty',        price:79.95,  perStaff:false, detail:'Per location' },
-      aiConcierge:  { name:'AI Concierge',          price:139.95, perStaff:false, detail:'Per location' },
-      googleBoost:  { name:'Google Rating Boost',   price:20.95,  perStaff:false, detail:'Per location' },
-      dataConnector:{ name:'Data Connector',        price:295,   perStaff:false, detail:'Per location' },
+      loyalty:      { name:'Client Loyalty',        price:79.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      aiConcierge:  { name:'AI Concierge',          price:139.95, perStaff:false, perLocation:true, detail:'Per location' },
+      googleBoost:  { name:'Google Rating Boost',   price:20.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      dataConnector:{ name:'Data Connector',        price:295,    perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:249 },
@@ -822,14 +826,17 @@ let pkgState = [
 // HELPERS
 // ═══════════════════════════════════════════════════════════════════
 
-function staff()    { return Math.max(1, parseInt(document.getElementById('staffCount').value) || 1); }
-function role()     { return document.getElementById('roleSelect').value; }
-function sym()      { return PRICING[region].sym; }
-function lim(key)   { return (LIMITS[key]||{})[role()] ?? 0; }
+function staff()     { return Math.max(1, parseInt(document.getElementById('staffCount').value) || 1); }
+function locations() { return Math.max(1, parseInt(document.getElementById('locationCount').value) || 1); }
+function role()      { return document.getElementById('roleSelect').value; }
+function sym()       { return PRICING[region].sym; }
+function lim(key)    { return (LIMITS[key]||{})[role()] ?? 0; }
 
 function regM(key, s) {
   const m = PRICING[region].monthly[key];
-  return m.perStaff ? m.price * s : m.price;
+  if (m.perStaff)    return m.price * s;
+  if (m.perLocation) return m.price * locations();
+  return m.price;
 }
 function netM(key, s, pkg) {
   return regM(key, s) * (1 - (pkg.discounts[key] || 0) / 100);
@@ -941,7 +948,7 @@ function buildPkgCards() {
             onchange="toggleItem(${idx},'monthly','${key}',this.checked)" onclick="event.stopPropagation()">
           <div class="item-info">
             <div class="item-name">${item.name}${isLocked ? '<span class="required-pill">Required</span>' : ''}</div>
-            <div class="item-detail">${item.detail}${item.perStaff ? ' · ×'+s : ''}${hasDisc ? ' · <b style="color:var(--purple-dark)">'+d+'% off</b>' : ''}</div>
+            <div class="item-detail">${item.detail}${item.perStaff ? ' · ×'+s+' staff' : ''}${item.perLocation ? ' · ×'+locations()+' location'+(locations()>1?'s':'') : ''}${hasDisc ? ' · <b style="color:var(--purple-dark)">'+d+'% off</b>' : ''}</div>
           </div>
           <div class="item-pricing" onclick="event.stopPropagation()">
             ${priceHtml}
@@ -1149,7 +1156,7 @@ function buildProposalTable() {
     Object.entries(PRICING[region].monthly).forEach(([key, item]) => {
       if (!pkg.monthly[key]) return;
       const d  = pkg.discounts[key] || 0;
-      const de = item.perStaff ? ` – ${s} staff` : '';
+      const de = item.perStaff ? ` – ${s} staff` : item.perLocation ? ` – ${locations()} location${locations()>1?'s':''}` : '';
       const dn = d > 0
         ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">(${d}% off)</span>` : '';
       inc += `<li>${item.name}${de}${dn}</li>`;
@@ -1222,7 +1229,8 @@ function copyTable() {
     Object.entries(PRICING[region].monthly).forEach(([key, item]) => {
       if (!pkg.monthly[key]) return;
       const d = pkg.discounts[key] || 0;
-      txt += `  • ${item.name}${item.perStaff ? ` (${s} staff)` : ''}${d>0 ? ` — ${d}% off` : ''}\n`;
+      const locStr = item.perLocation ? ` (${locations()} location${locations()>1?'s':''})` : '';
+      txt += `  • ${item.name}${item.perStaff ? ` (${s} staff)` : locStr}${d>0 ? ` — ${d}% off` : ''}\n`;
     });
     Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
       if (!pkg.onetime[key]) return;

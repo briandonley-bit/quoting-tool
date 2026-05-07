@@ -404,6 +404,39 @@ header {
   font-weight: 500;
 }
 
+/* Terminal quantity chip */
+.qty-chip {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  overflow: visible;
+  width: 72px;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+.qty-chip.has-qty { border-color: var(--purple-mid); background: var(--purple-xl); }
+.qty-chip input {
+  width: 44px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 3px 2px 3px 6px;
+  outline: none;
+  color: var(--text);
+  text-align: right;
+}
+.qty-chip .qty-lbl {
+  font-size: 10px;
+  color: var(--muted);
+  padding-right: 5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 /* Row warning tooltip */
 .max-hint {
   font-size: 9px;
@@ -676,6 +709,18 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
     </div>
 
     <!-- Discount option lists (hidden, referenced by disc inputs) -->
+    <datalist id="dl-qty">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+      <option value="8">8</option>
+      <option value="9">9</option>
+      <option value="10">10</option>
+    </datalist>
     <datalist id="dl-addon">
       <option value="0">0%</option>
       <option value="10">10%</option>
@@ -789,12 +834,20 @@ const LIMIT_LABELS = [
   { label:'Photoshoot',         key:'photoshoot'     },
 ];
 
+// Items that support a quantity multiplier
+const QTY_ITEMS = ['terminalS1F2', 'terminalAMS1'];
+
 // Factory for a fresh discounts object (all zeros)
 function freshDiscs() {
   return {
     subscription:0, insights:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0,
     accountSetup:0, essentialMig:0, terminalS1F2:0, terminalAMS1:0, photoshoot:0,
   };
+}
+
+// Factory for a fresh quantities object (all 1)
+function freshQtys() {
+  return { terminalS1F2:1, terminalAMS1:1 };
 }
 
 // ── State ──────────────────────────────────────────────────────────
@@ -806,19 +859,19 @@ let pkgState = [
     name:'Fully Loaded', tier:'best', tierLabel:'Best', visible:true,
     monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, googleBoost:false, dataConnector:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
-    discounts: freshDiscs(),
+    discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Loyalty & Growth', tier:'better', tierLabel:'Better', visible:true,
     monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, googleBoost:false, dataConnector:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
-    discounts: freshDiscs(),
+    discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Basic', tier:'good', tierLabel:'Good', visible:true,
     monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, googleBoost:false, dataConnector:false },
     onetime: { accountSetup:true,  essentialMig:false, terminalS1F2:false, terminalAMS1:false, photoshoot:false },
-    discounts: freshDiscs(),
+    discounts: freshDiscs(), qtys: freshQtys(),
   },
 ];
 
@@ -841,9 +894,13 @@ function regM(key, s) {
 function netM(key, s, pkg) {
   return regM(key, s) * (1 - (pkg.discounts[key] || 0) / 100);
 }
-function regO(key)  { return PRICING[region].onetime[key].price; }
+function regO(key, pkg) {
+  const base = PRICING[region].onetime[key].price;
+  const qty  = (pkg && pkg.qtys && pkg.qtys[key]) ? (pkg.qtys[key] || 1) : 1;
+  return base * qty;
+}
 function netO(key, pkg) {
-  return regO(key) * (1 - (pkg.discounts[key] || 0) / 100);
+  return regO(key, pkg) * (1 - (pkg.discounts[key] || 0) / 100);
 }
 
 function fmt(n) {
@@ -856,7 +913,7 @@ function pkgTotals(pkg, s) {
     if (pkg.monthly[k]) { rM += regM(k,s); nM += netM(k,s,pkg); }
   });
   Object.keys(PRICING[region].onetime).forEach(k => {
-    if (pkg.onetime[k]) { rO += regO(k); nO += netO(k,pkg); }
+    if (pkg.onetime[k]) { rO += regO(k,pkg); nO += netO(k,pkg); }
   });
   return { rM, nM, rO, nO };
 }
@@ -972,7 +1029,9 @@ function buildPkgCards() {
       const limit    = lim(key);
       const exceeded = d > limit && limit > 0;
 
-      const rP = regO(key);
+      const isQtyItem = QTY_ITEMS.includes(key);
+      const qty  = isQtyItem ? (pkg.qtys[key] || 1) : 1;
+      const rP = regO(key, pkg);
       const nP = netO(key, pkg);
       const hasDisc = d > 0;
 
@@ -985,6 +1044,7 @@ function buildPkgCards() {
       const chipCls = exceeded ? 'disc-chip exceeded' : (hasDisc ? 'disc-chip has-disc' : 'disc-chip');
       const maxNote = exceeded ? `<span style="font-size:9px;color:var(--warning);font-weight:700;padding-left:2px;">max ${limit}%</span>` : '';
       const listAttr = dlId && !noDisc ? `list="${dlId}"` : '';
+      const qtyCls  = qty > 1 ? 'qty-chip has-qty' : 'qty-chip';
 
       oHtml += `
         <label class="item-row">
@@ -992,10 +1052,17 @@ function buildPkgCards() {
             onchange="toggleItem(${idx},'onetime','${key}',this.checked)" onclick="event.stopPropagation()">
           <div class="item-info">
             <div class="item-name">${item.name}</div>
-            <div class="item-detail">One-time fee${hasDisc && !noDisc ? ' · <b style="color:var(--purple-dark)">'+d+'% off</b>' : ''}</div>
+            <div class="item-detail">One-time fee${isQtyItem && qty > 1 ? ' · <b style="color:var(--purple-dark)">×'+qty+'</b>' : ''}${hasDisc && !noDisc ? ' · <b style="color:var(--purple-dark)">'+d+'% off</b>' : ''}</div>
           </div>
           <div class="item-pricing" onclick="event.stopPropagation()">
             ${priceHtml}
+            ${isQtyItem ? `<div class="${qtyCls}">
+              <input type="text" inputmode="numeric" list="dl-qty"
+                value="${qty}" placeholder="1"
+                title="Number of terminals"
+                oninput="setItemQty(${idx},'${key}',this.value)">
+              <span class="qty-lbl">qty</span>
+            </div>` : ''}
             ${noDisc ? '' : `<div class="${chipCls}">
               <input type="text" inputmode="numeric" ${listAttr}
                 value="${d > 0 ? d : ''}" placeholder="0"
@@ -1071,6 +1138,12 @@ function toggleItem(idx, section, key, checked) {
   buildProposalTable();
 }
 
+function setItemQty(idx, key, val) {
+  pkgState[idx].qtys[key] = Math.max(1, parseInt(val) || 1);
+  refreshPkgFooter(idx);
+  buildProposalTable();
+}
+
 function setItemDisc(idx, key, val) {
   pkgState[idx].discounts[key] = parseFloat(val) || 0;
   // Partial refresh: just update footer + proposal table to avoid losing focus
@@ -1120,6 +1193,7 @@ function quickApplyPkg(idx, cap) {
 
 function clearPkg(idx) {
   pkgState[idx].discounts = freshDiscs();
+  pkgState[idx].qtys = freshQtys();
   document.getElementById('pq' + idx).value = '';
   buildPkgCards();
   buildProposalTable();
@@ -1163,10 +1237,11 @@ function buildProposalTable() {
     });
     Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
       if (!pkg.onetime[key]) return;
-      const d  = pkg.discounts[key] || 0;
-      const dn = d > 0
-        ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">(${d}% off)</span>` : '';
-      inc += `<li>${item.name} <span style="color:var(--muted);font-size:11px">(one-time)</span>${dn}</li>`;
+      const d   = pkg.discounts[key] || 0;
+      const qty = QTY_ITEMS.includes(key) ? (pkg.qtys[key] || 1) : 1;
+      const dq  = qty > 1 ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">×${qty}</span>` : '';
+      const dn  = d > 0 ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">(${d}% off)</span>` : '';
+      inc += `<li>${item.name}${dq} <span style="color:var(--muted);font-size:11px">(one-time)</span>${dn}</li>`;
     });
     inc += '</ul>';
 
@@ -1234,8 +1309,9 @@ function copyTable() {
     });
     Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
       if (!pkg.onetime[key]) return;
-      const d = pkg.discounts[key] || 0;
-      txt += `  • ${item.name} (one-time)${d>0 ? ` — ${d}% off` : ''}\n`;
+      const d   = pkg.discounts[key] || 0;
+      const qty = QTY_ITEMS.includes(key) ? (pkg.qtys[key] || 1) : 1;
+      txt += `  • ${item.name}${qty > 1 ? ` ×${qty}` : ''} (one-time)${d>0 ? ` — ${d}% off` : ''}\n`;
     });
     txt += `Monthly: ${fmt(rM)}/mo${nM < rM-0.001 ? ` → ${fmt(nM)}/mo (discounted)` : ''}\n`;
     txt += `One-Time: ${rO > 0 ? fmt(nO < rO-0.001 ? nO : rO) : '—'}\n${'─'.repeat(65)}\n`;
@@ -1332,7 +1408,7 @@ function buildSetupDetailsEl(s, name) {
     tbody += `<tr style="border-bottom:1px solid #e5e7eb;">
       <td style="background:${bg};padding:14px 18px;vertical-align:middle;">
         <div style="font-size:13px;font-weight:700;color:#1a1a1a;">${item.name}</div>
-        <div style="font-size:11px;color:#6b7280;margin-top:2px;">One-time fee</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:2px;">One-time fee${QTY_ITEMS.includes(key) && ordered.some(p=>p.onetime[key]&&(p.qtys[key]||1)>1) ? ' · qty varies by package' : ''}</div>
       </td>`;
     ordered.forEach(pkg => {
       const cellBg = pkg.tier === 'best' ? '#f0edff' : bg;
@@ -1340,9 +1416,10 @@ function buildSetupDetailsEl(s, name) {
         tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;font-size:22px;color:#d1d5db;">—</td>`;
         return;
       }
-      const d  = pkg.discounts[key] || 0;
-      const rP = regO(key);
-      const nP = netO(key, pkg);
+      const d   = pkg.discounts[key] || 0;
+      const qty = QTY_ITEMS.includes(key) ? (pkg.qtys[key] || 1) : 1;
+      const rP  = regO(key, pkg);
+      const nP  = netO(key, pkg);
       if (d > 0) {
         tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;">
           <div style="font-size:9px;font-weight:700;color:#6B4EFF;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Your price</div>

@@ -756,10 +756,11 @@ const PRICING = {
     cur:'USD', sym:'$',
     monthly:{
       subscription: { name:'Fresha Subscription',  price:14.95, perStaff:true,  detail:'Per bookable team member' },
-      insights:     { name:'Insights',              price:9.95,  perStaff:true,  detail:'Per bookable team member' },
       loyalty:      { name:'Client Loyalty',        price:59.95,  perStaff:false, perLocation:true, detail:'Per location' },
-      aiConcierge:  { name:'AI Concierge',          price:99.95,  perStaff:false, perLocation:true, detail:'Per location' },
       googleBoost:  { name:'Google Rating Boost',   price:14.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      insights:     { name:'Insights',              price:9.95,  perStaff:true,  detail:'Per bookable team member' },
+      teamConnect:  { name:'Team Connect',          price:2.95,  perStaff:true,  detail:'Per bookable team member' },
+      aiConcierge:  { name:'AI Concierge',          price:99.95,  perStaff:false, perLocation:true, detail:'Per location' },
       dataConnector:{ name:'Data Connector',        price:295,    perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
@@ -774,10 +775,11 @@ const PRICING = {
     cur:'CAD', sym:'CA$',
     monthly:{
       subscription: { name:'Fresha Subscription',  price:19.95, perStaff:true,  detail:'Per bookable team member' },
-      insights:     { name:'Insights',              price:13.95, perStaff:true,  detail:'Per bookable team member' },
       loyalty:      { name:'Client Loyalty',        price:79.95,  perStaff:false, perLocation:true, detail:'Per location' },
-      aiConcierge:  { name:'AI Concierge',          price:139.95, perStaff:false, perLocation:true, detail:'Per location' },
       googleBoost:  { name:'Google Rating Boost',   price:20.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      insights:     { name:'Insights',              price:13.95, perStaff:true,  detail:'Per bookable team member' },
+      teamConnect:  { name:'Team Connect',          price:3.95,  perStaff:true,  detail:'Per bookable team member' },
+      aiConcierge:  { name:'AI Concierge',          price:139.95, perStaff:false, perLocation:true, detail:'Per location' },
       dataConnector:{ name:'Data Connector',        price:295,    perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
@@ -794,6 +796,7 @@ const PRICING = {
 const LIMITS = {
   subscription: { IC:10, TL:20, HO:30, GM:40  },
   insights:     { IC:20, TL:30, HO:40, GM:50  },
+  teamConnect:  { IC:20, TL:30, HO:40, GM:50  },
   loyalty:      { IC:20, TL:30, HO:40, GM:50  },
   aiConcierge:  { IC:20, TL:30, HO:40, GM:50  },
   googleBoost:  { IC:20, TL:30, HO:40, GM:50  },
@@ -809,6 +812,7 @@ const LIMITS = {
 const DISC_LIST = {
   subscription:  null,
   insights:      'dl-addon',
+  teamConnect:   'dl-addon',
   loyalty:       'dl-addon',
   aiConcierge:   'dl-addon',
   googleBoost:   'dl-addon',
@@ -824,6 +828,7 @@ const DISC_LIST = {
 const LIMIT_LABELS = [
   { label:'Team Subscription',  key:'subscription'  },
   { label:'Insights',           key:'insights'       },
+  { label:'Team Connect',       key:'teamConnect'    },
   { label:'Client Loyalty',     key:'loyalty'        },
   { label:'AI Concierge',       key:'aiConcierge'    },
   { label:'Google Rating Boost',key:'googleBoost'    },
@@ -840,7 +845,7 @@ const QTY_ITEMS = ['terminalS1F2', 'terminalAMS1'];
 // Factory for a fresh discounts object (all zeros)
 function freshDiscs() {
   return {
-    subscription:0, insights:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0,
+    subscription:0, insights:0, teamConnect:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0,
     accountSetup:0, essentialMig:0, terminalS1F2:0, terminalAMS1:0, photoshoot:0,
   };
 }
@@ -857,19 +862,19 @@ let region = 'USA';
 let pkgState = [
   {
     name:'Fully Loaded', tier:'best', tierLabel:'Best', visible:true,
-    monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, googleBoost:false, dataConnector:false },
+    monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Loyalty & Growth', tier:'better', tierLabel:'Better', visible:true,
-    monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, googleBoost:false, dataConnector:false },
+    monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Basic', tier:'good', tierLabel:'Good', visible:true,
-    monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, googleBoost:false, dataConnector:false },
+    monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false },
     onetime: { accountSetup:true,  essentialMig:false, terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },

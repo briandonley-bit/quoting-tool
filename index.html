@@ -600,6 +600,60 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
 .print-show { display: none; margin-bottom: 18px; }
 .print-show h1 { font-size: 21px; font-weight: 800; }
 .print-show p  { color: #666; font-size: 13px; margin-top: 2px; }
+
+/* ── Saved Quotes ─────────────────────────────────────────────────── */
+.sq-header {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none;
+}
+.sq-header .card-title { margin-bottom: 0; }
+.sq-chevron { font-size: 11px; color: var(--muted); transition: transform .2s; display: inline-block; }
+.sq-chevron.open { transform: rotate(180deg); }
+.sq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.sq-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  padding: 14px 16px;
+  background: var(--white);
+  display: flex; flex-direction: column; gap: 5px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.sq-card:hover { border-color: var(--purple-mid); box-shadow: 0 2px 12px rgba(107,78,255,.10); }
+.sq-company { font-size: 14px; font-weight: 700; color: var(--ink); }
+.sq-meta { font-size: 11px; color: var(--muted); }
+.sq-price { font-size: 13px; font-weight: 700; color: var(--purple); }
+.sq-date { font-size: 11px; color: #b0b7c3; }
+.sq-actions { display: flex; gap: 8px; margin-top: 6px; }
+.btn-sq-load {
+  flex: 1; padding: 7px 12px; background: var(--purple); color: #fff;
+  border: none; border-radius: var(--rsm); font-size: 12px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background .15s;
+}
+.btn-sq-load:hover { background: var(--purple-dark); }
+.btn-sq-del {
+  padding: 7px 11px; background: #fff; color: #ef4444;
+  border: 1.5px solid #fecaca; border-radius: var(--rsm);
+  font-size: 12px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: all .15s;
+}
+.btn-sq-del:hover { background: #fef2f2; border-color: #ef4444; }
+.sq-empty { font-size: 13px; color: var(--muted); padding: 12px 0 4px; }
+.sq-count-badge {
+  font-size: 10px; color: var(--purple); font-weight: 700;
+  background: var(--purple-light); padding: 2px 9px;
+  border-radius: var(--pill); margin-left: 8px;
+}
+.btn-save-quote {
+  padding: 9px 18px; background: var(--purple); color: #fff;
+  border: none; border-radius: var(--rsm); font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; transition: background .15s; white-space: nowrap;
+}
+.btn-save-quote:hover { background: var(--purple-dark); }
 </style>
 </head>
 <body>
@@ -648,6 +702,28 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
           <option value="GM">GM – General Manager</option>
         </select>
       </div>
+      <div class="cfg">
+        <label>Rep Name</label>
+        <input type="text" id="repName" placeholder="Your name" oninput="onRepNameChange()" autocomplete="off">
+      </div>
+      <div class="cfg" style="flex:0;min-width:auto;justify-content:flex-end;">
+        <label>&nbsp;</label>
+        <button class="btn-save-quote" onclick="saveCurrentQuote()">💾 Save Quote</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Saved Quotes -->
+  <div class="card" id="sqSection" style="margin-bottom:18px;">
+    <div class="sq-header" onclick="toggleSavedQuotes()">
+      <div class="card-title" style="margin-bottom:0">
+        Saved Quotes
+        <span class="sq-count-badge" id="sqCount">0</span>
+      </div>
+      <span class="sq-chevron" id="sqChevron">▼</span>
+    </div>
+    <div id="sqPanel" style="display:none;">
+      <div id="sqGrid" class="sq-grid"></div>
     </div>
   </div>
 
@@ -705,7 +781,7 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
 
     <div class="notes-area">
       <label>Notes / Custom Terms</label>
-      <textarea placeholder="Contract length, payment schedule, special conditions…"></textarea>
+      <textarea id="notesTextarea" placeholder="Contract length, payment schedule, special conditions…"></textarea>
     </div>
 
     <!-- Discount option lists (hidden, referenced by disc inputs) -->
@@ -762,6 +838,7 @@ const PRICING = {
       teamConnect:  { name:'Team Connect',          price:2.95,  perStaff:true,  detail:'Per bookable team member' },
       aiConcierge:  { name:'AI Concierge',          price:99.95,  perStaff:false, perLocation:true, detail:'Per location' },
       dataConnector:{ name:'Data Connector',        price:295,    perStaff:false, perLocation:true, detail:'Per location' },
+      xeroInteg:    { name:'Xero Integration',      price:9.95,   perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:199 },
@@ -780,7 +857,8 @@ const PRICING = {
       insights:     { name:'Insights',              price:13.95, perStaff:true,  detail:'Per bookable team member' },
       teamConnect:  { name:'Team Connect',          price:3.95,  perStaff:true,  detail:'Per bookable team member' },
       aiConcierge:  { name:'AI Concierge',          price:139.95, perStaff:false, perLocation:true, detail:'Per location' },
-      dataConnector:{ name:'Data Connector',        price:295,    perStaff:false, perLocation:true, detail:'Per location' },
+      dataConnector:{ name:'Data Connector',        price:305,    perStaff:false, perLocation:true, detail:'Per location' },
+      xeroInteg:    { name:'Xero Integration',      price:13.95,  perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:249 },
@@ -801,6 +879,7 @@ const LIMITS = {
   aiConcierge:  { IC:20, TL:30, HO:40, GM:50  },
   googleBoost:  { IC:20, TL:30, HO:40, GM:50  },
   dataConnector:{ IC:20, TL:30, HO:40, GM:50  },
+  xeroInteg:    { IC:20, TL:30, HO:40, GM:50  },
   accountSetup: { IC:20, TL:30, HO:30, GM:100 },
   essentialMig: { IC:20, TL:30, HO:30, GM:100 },
   terminalS1F2: { IC:50, TL:75, HO:75, GM:100 },
@@ -817,6 +896,7 @@ const DISC_LIST = {
   aiConcierge:   'dl-addon',
   googleBoost:   'dl-addon',
   dataConnector: 'dl-addon',
+  xeroInteg:     'dl-addon',
   accountSetup:  'dl-onetime-fee',
   essentialMig:  'dl-onetime-fee',
   terminalS1F2:  'dl-onetime-fee',
@@ -833,6 +913,7 @@ const LIMIT_LABELS = [
   { label:'AI Concierge',       key:'aiConcierge'    },
   { label:'Google Rating Boost',key:'googleBoost'    },
   { label:'Data Connector',     key:'dataConnector'  },
+  { label:'Xero Integration',   key:'xeroInteg'      },
   { label:'Account Setup',      key:'accountSetup'   },
   { label:'Data Migration',     key:'essentialMig'   },
   { label:'Terminals (S1F2/AMS1)', key:'terminalS1F2' },
@@ -845,7 +926,7 @@ const QTY_ITEMS = ['terminalS1F2', 'terminalAMS1'];
 // Factory for a fresh discounts object (all zeros)
 function freshDiscs() {
   return {
-    subscription:0, insights:0, teamConnect:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0,
+    subscription:0, insights:0, teamConnect:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0, xeroInteg:0,
     accountSetup:0, essentialMig:0, terminalS1F2:0, terminalAMS1:0, photoshoot:0,
   };
 }
@@ -862,19 +943,19 @@ let region = 'USA';
 let pkgState = [
   {
     name:'Fully Loaded', tier:'best', tierLabel:'Best', visible:true,
-    monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false },
+    monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Loyalty & Growth', tier:'better', tierLabel:'Better', visible:true,
-    monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false },
+    monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Basic', tier:'good', tierLabel:'Good', visible:true,
-    monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false },
+    monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false },
     onetime: { accountSetup:true,  essentialMig:false, terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
@@ -1526,6 +1607,165 @@ function showToast(msg) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// SAVED QUOTES
+// ═══════════════════════════════════════════════════════════════════
+
+function getRepName() {
+  return (document.getElementById('repName').value || '').trim();
+}
+
+function onRepNameChange() {
+  const n = getRepName();
+  if (n) localStorage.setItem('freshaRepName', n);
+  buildSavedQuotes();
+}
+
+function sqKey(rep) {
+  return 'freshaQuotes_' + (rep || 'default').toLowerCase().replace(/\s+/g, '_');
+}
+
+function loadAllQuotes(rep) {
+  try { return JSON.parse(localStorage.getItem(sqKey(rep)) || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveAllQuotes(rep, arr) {
+  localStorage.setItem(sqKey(rep), JSON.stringify(arr));
+}
+
+function saveCurrentQuote() {
+  const rep = getRepName();
+  if (!rep) {
+    showToast('⚠ Enter your Rep Name before saving');
+    document.getElementById('repName').focus();
+    return;
+  }
+  const company = document.getElementById('companyName').value.trim();
+  if (!company) {
+    showToast('⚠ Enter a Prospect / Company name before saving');
+    document.getElementById('companyName').focus();
+    return;
+  }
+
+  const notes = document.getElementById('notesTextarea').value;
+  const quote = {
+    id: Date.now(),
+    savedAt: new Date().toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }),
+    rep,
+    company,
+    region,
+    staff: staff(),
+    locations: locations(),
+    role: role(),
+    pkgState: JSON.parse(JSON.stringify(pkgState)),
+    notes,
+  };
+
+  const arr = loadAllQuotes(rep);
+  // If same company already exists for this rep, replace it (keep the latest)
+  const idx = arr.findIndex(q => q.company.toLowerCase() === company.toLowerCase());
+  if (idx >= 0) arr.splice(idx, 1);
+  arr.unshift(quote); // newest first
+  saveAllQuotes(rep, arr);
+  buildSavedQuotes();
+
+  // Auto-open the panel so rep sees their quote
+  document.getElementById('sqPanel').style.display = 'block';
+  document.getElementById('sqChevron').classList.add('open');
+  showToast(`✓ Quote saved for ${company}`);
+}
+
+function loadQuote(id) {
+  const rep = getRepName();
+  if (!rep) {
+    showToast('⚠ Enter your Rep Name to load quotes');
+    document.getElementById('repName').focus();
+    return;
+  }
+  const q = loadAllQuotes(rep).find(x => x.id === id);
+  if (!q) { showToast('Quote not found'); return; }
+
+  // Restore all state
+  region = q.region;
+  document.getElementById('btnUSA').classList.toggle('active', q.region === 'USA');
+  document.getElementById('btnCAN').classList.toggle('active', q.region === 'CAN');
+  document.getElementById('companyName').value   = q.company;
+  document.getElementById('staffCount').value    = q.staff;
+  document.getElementById('locationCount').value = q.locations;
+  document.getElementById('roleSelect').value    = q.role;
+  document.getElementById('notesTextarea').value = q.notes || '';
+  pkgState = JSON.parse(JSON.stringify(q.pkgState));
+
+  update();
+  showToast(`✓ Loaded quote for ${q.company}`);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function deleteQuote(id) {
+  const rep = getRepName();
+  if (!rep) return;
+  const arr = loadAllQuotes(rep).filter(q => q.id !== id);
+  saveAllQuotes(rep, arr);
+  buildSavedQuotes();
+  showToast('Quote deleted');
+}
+
+function toggleSavedQuotes() {
+  const panel   = document.getElementById('sqPanel');
+  const chevron = document.getElementById('sqChevron');
+  const isOpen  = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  chevron.classList.toggle('open', !isOpen);
+}
+
+function buildSavedQuotes() {
+  const rep    = getRepName();
+  const arr    = rep ? loadAllQuotes(rep) : [];
+  const countEl = document.getElementById('sqCount');
+  const grid    = document.getElementById('sqGrid');
+  if (!countEl || !grid) return;
+
+  countEl.textContent = arr.length;
+
+  if (arr.length === 0) {
+    grid.innerHTML = `<div class="sq-empty">No saved quotes yet — configure a package above and click <strong>💾 Save Quote</strong>.</div>`;
+    return;
+  }
+
+  grid.innerHTML = arr.map(q => {
+    // Compute best-package discounted monthly total from saved data
+    const r = q.region;
+    const s = q.staff;
+    const l = q.locations;
+    const best = q.pkgState.find(p => p.tier === 'best') || q.pkgState[0];
+    let nM = 0;
+    if (best) {
+      Object.keys(PRICING[r].monthly).forEach(k => {
+        if (!best.monthly[k]) return;
+        const m = PRICING[r].monthly[k];
+        const base = m.perStaff ? m.price * s : m.perLocation ? m.price * l : m.price;
+        nM += base * (1 - (best.discounts[k] || 0) / 100);
+      });
+    }
+    const sym_  = PRICING[r].sym;
+    const mStr  = sym_ + nM.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    const flag  = r === 'CAN' ? '🇨🇦' : '🇺🇸';
+    const vis   = q.pkgState.filter(p => p.visible !== false).length;
+
+    return `<div class="sq-card">
+      <div class="sq-company">${q.company}</div>
+      <div class="sq-meta">${flag} ${r} · ${s} staff · ${l} location${l > 1 ? 's' : ''} · ${vis} package${vis !== 1 ? 's' : ''} · ${q.role}</div>
+      <div class="sq-price">Best pkg: ${mStr}/mo</div>
+      <div class="sq-date">Saved ${q.savedAt}</div>
+      <div class="sq-actions">
+        <button class="btn-sq-load" onclick="loadQuote(${q.id})">Load</button>
+        <button class="btn-sq-del" onclick="deleteQuote(${q.id})">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // MAIN UPDATE
 // ═══════════════════════════════════════════════════════════════════
 
@@ -1545,7 +1785,14 @@ function update() {
   buildProposalTable();
 }
 
+// Restore rep name from last session
+(function() {
+  const saved = localStorage.getItem('freshaRepName');
+  if (saved) document.getElementById('repName').value = saved;
+})();
+
 update();
+buildSavedQuotes();
 </script>
 </body>
 </html>

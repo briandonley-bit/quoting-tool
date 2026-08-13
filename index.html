@@ -112,7 +112,7 @@ header {
 }
 .region-btns { display: flex; gap: 4px; }
 .rbtn {
-  padding: 8px 18px;
+  padding: 8px 13px;
   border: 1.5px solid var(--border);
   border-radius: var(--pill);
   cursor: pointer;
@@ -122,6 +122,7 @@ header {
   background: var(--white);
   color: var(--muted);
   transition: all .18s;
+  white-space: nowrap;
 }
 .rbtn.active { border-color: var(--purple); background: var(--purple); color: #fff; }
 
@@ -726,7 +727,7 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
         <label>Prospect / Company</label>
         <input type="text" id="companyName" placeholder="e.g. Luxe Salon Studio" oninput="update()">
       </div>
-      <div class="cfg">
+      <div class="cfg" style="flex:2;min-width:260px;">
         <label>Market</label>
         <div class="region-btns">
           <button class="rbtn active" id="btnUSA" onclick="setRegion('USA')">🇺🇸 USA</button>

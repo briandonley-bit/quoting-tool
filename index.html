@@ -601,6 +601,45 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
 .print-show h1 { font-size: 21px; font-weight: 800; }
 .print-show p  { color: #666; font-size: 13px; margin-top: 2px; }
 
+/* ── Tabs ─────────────────────────────────────────────────────────── */
+.tab-nav {
+  display: flex;
+  gap: 0;
+  margin-bottom: 22px;
+  border-bottom: 2px solid var(--border);
+}
+.tab-btn {
+  padding: 11px 24px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color .15s, border-color .15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tab-btn:hover { color: var(--ink); }
+.tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+/* ── Unavailable items (Mexico) ───────────────────────────────────── */
+.item-row.unavail {
+  opacity: 0.38;
+  pointer-events: none;
+}
+.unavail-tag {
+  font-size: 9px; font-weight: 700; color: var(--muted);
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--pill); padding: 1px 7px;
+  margin-left: 6px; text-transform: uppercase; letter-spacing: 0.4px;
+  vertical-align: middle;
+}
+
 /* ── Saved Quotes ─────────────────────────────────────────────────── */
 .sq-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -670,6 +709,15 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
 
 <div class="wrap">
 
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tabBtnBuilder" onclick="switchTab('builder')">Quote Builder</button>
+    <button class="tab-btn" id="tabBtnSaved" onclick="switchTab('saved')">Saved Quotes <span class="sq-count-badge" id="sqCount">0</span></button>
+  </div>
+
+  <!-- ── Tab: Quote Builder ─────────────────────────────────────── -->
+  <div id="tab-builder">
+
   <!-- Config -->
   <div class="card">
     <div class="card-title">Quote Configuration</div>
@@ -683,6 +731,7 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
         <div class="region-btns">
           <button class="rbtn active" id="btnUSA" onclick="setRegion('USA')">🇺🇸 USA</button>
           <button class="rbtn" id="btnCAN" onclick="setRegion('CAN')">🇨🇦 Canada</button>
+          <button class="rbtn" id="btnMXN" onclick="setRegion('MXN')">🇲🇽 Mexico</button>
         </div>
       </div>
       <div class="cfg">
@@ -710,20 +759,6 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
         <label>&nbsp;</label>
         <button class="btn-save-quote" onclick="saveCurrentQuote()">💾 Save Quote</button>
       </div>
-    </div>
-  </div>
-
-  <!-- Saved Quotes -->
-  <div class="card" id="sqSection" style="margin-bottom:18px;">
-    <div class="sq-header" onclick="toggleSavedQuotes()">
-      <div class="card-title" style="margin-bottom:0">
-        Saved Quotes
-        <span class="sq-count-badge" id="sqCount">0</span>
-      </div>
-      <span class="sq-chevron" id="sqChevron">▼</span>
-    </div>
-    <div id="sqPanel" style="display:none;">
-      <div id="sqGrid" class="sq-grid"></div>
     </div>
   </div>
 
@@ -817,6 +852,17 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
     </datalist>
   </div>
 
+  </div><!-- /tab-builder -->
+
+  <!-- ── Tab: Saved Quotes ─────────────────────────────────────── -->
+  <div id="tab-saved" style="display:none;">
+    <div class="card">
+      <div class="card-title">Saved Quotes <span class="sq-count-badge" id="sqCountTab">0</span></div>
+      <p id="sqRepHint" style="font-size:13px;color:var(--muted);margin-bottom:4px;"></p>
+      <div id="sqGrid" class="sq-grid"></div>
+    </div>
+  </div>
+
 </div>
 
 <footer>fresha · Subscription Quoting Tool · Confidential Internal Use Only</footer>
@@ -867,8 +913,45 @@ const PRICING = {
       terminalAMS1: { name:'Terminal – AMS1',          price:249 },
       photoshoot:   { name:'Photoshoot (1 Hour)',       price:209 },
     }
+  },
+  MXN: {
+    cur:'MXN', sym:'MX$',
+    monthly:{
+      subscription: { name:'Fresha Subscription',  price:159.95, perStaff:true,  detail:'Per bookable team member' },
+      loyalty:      { name:'Client Loyalty',        price:950,    perStaff:false, perLocation:true, detail:'Per location' },
+      googleBoost:  { name:'Google Rating Boost',   price:164.95, perStaff:false, perLocation:true, detail:'Per location' },
+      insights:     { name:'Insights',              price:100,    perStaff:true,  detail:'Per bookable team member' },
+      teamConnect:  { name:'Team Connect',          price:0,      perStaff:true,  detail:'Per bookable team member' },
+      aiConcierge:  { name:'AI Concierge',          price:0,      perStaff:false, perLocation:true, detail:'Per location' },
+      dataConnector:{ name:'Data Connector',        price:0,      perStaff:false, perLocation:true, detail:'Per location' },
+      xeroInteg:    { name:'Xero Integration',      price:0,      perStaff:false, perLocation:true, detail:'Per location' },
+    },
+    onetime:{
+      accountSetup: { name:'Account Setup',            price:0    },
+      essentialMig: { name:'Essential Data Migration', price:3900 },
+      terminalS1F2: { name:'Terminal – S1F2',          price:0    },
+      terminalAMS1: { name:'Terminal – AMS1',          price:0    },
+      photoshoot:   { name:'Photoshoot (1 Hour)',       price:0    },
+    }
   }
 };
+
+// Which items are available in Mexico (all others greyed out + disabled)
+const MXN_AVAIL = {
+  monthly: {
+    subscription: true, loyalty: true, googleBoost: true, insights: true,
+    teamConnect: false, aiConcierge: false, dataConnector: false, xeroInteg: false,
+  },
+  onetime: {
+    accountSetup: false, essentialMig: true,
+    terminalS1F2: false, terminalAMS1: false, photoshoot: false,
+  }
+};
+
+function isAvail(section, key) {
+  if (region !== 'MXN') return true;
+  return (MXN_AVAIL[section] || {})[key] !== false;
+}
 
 // Per-item role discount ceilings (%)
 const LIMITS = {
@@ -996,10 +1079,10 @@ function fmt(n) {
 function pkgTotals(pkg, s) {
   let rM=0, nM=0, rO=0, nO=0;
   Object.keys(PRICING[region].monthly).forEach(k => {
-    if (pkg.monthly[k]) { rM += regM(k,s); nM += netM(k,s,pkg); }
+    if (pkg.monthly[k] && isAvail('monthly', k)) { rM += regM(k,s); nM += netM(k,s,pkg); }
   });
   Object.keys(PRICING[region].onetime).forEach(k => {
-    if (pkg.onetime[k]) { rO += regO(k,pkg); nO += netO(k,pkg); }
+    if (pkg.onetime[k] && isAvail('onetime', k)) { rO += regO(k,pkg); nO += netO(k,pkg); }
   });
   return { rM, nM, rO, nO };
 }
@@ -1012,6 +1095,7 @@ function setRegion(r) {
   region = r;
   document.getElementById('btnUSA').classList.toggle('active', r==='USA');
   document.getElementById('btnCAN').classList.toggle('active', r==='CAN');
+  document.getElementById('btnMXN').classList.toggle('active', r==='MXN');
   update();
 }
 
@@ -1064,45 +1148,49 @@ function buildPkgCards() {
     // ── Monthly items ──
     let mHtml = '';
     Object.entries(PRICING[region].monthly).forEach(([key, item]) => {
+      const avail    = isAvail('monthly', key);
       const isLocked = key === 'subscription';
       const checked  = pkg.monthly[key];
       const d        = pkg.discounts[key] || 0;
       const limit    = lim(key);
       const exceeded = d > limit && limit > 0;
 
-      const rP = regM(key, s);
-      const nP = netM(key, s, pkg);
-      const hasDisc = d > 0;
+      const rP = avail ? regM(key, s) : 0;
+      const nP = avail ? netM(key, s, pkg) : 0;
+      const hasDisc = d > 0 && avail;
 
       // Price display
-      const priceHtml = hasDisc
-        ? `<span class="price-tag reg">${fmt(rP)}</span><span class="price-tag net">${fmt(nP)}</span>`
-        : `<span class="price-tag flat">${fmt(rP)}</span>`;
+      const priceHtml = !avail
+        ? `<span class="price-tag flat" style="color:var(--muted)">N/A</span>`
+        : hasDisc
+          ? `<span class="price-tag reg">${fmt(rP)}</span><span class="price-tag net">${fmt(nP)}</span>`
+          : `<span class="price-tag flat">${fmt(rP)}</span>`;
 
       const chipCls = exceeded ? 'disc-chip exceeded' : (hasDisc ? 'disc-chip has-disc' : 'disc-chip');
       const maxNote = exceeded ? `<span style="font-size:9px;color:var(--warning);font-weight:700;padding-left:2px;">max ${limit}%</span>` : '';
       const dlId    = DISC_LIST[key];
       const listAttr = dlId && dlId !== 'none' ? `list="${dlId}"` : '';
+      const naTag   = !avail ? '<span class="unavail-tag">Not available</span>' : '';
 
       mHtml += `
-        <label class="item-row">
-          <input type="checkbox" ${checked ? 'checked' : ''} ${isLocked ? 'disabled' : ''}
+        <label class="item-row${avail ? '' : ' unavail'}">
+          <input type="checkbox" ${checked ? 'checked' : ''} ${isLocked || !avail ? 'disabled' : ''}
             class="${isLocked ? 'cb-locked' : ''}"
             onchange="toggleItem(${idx},'monthly','${key}',this.checked)" onclick="event.stopPropagation()">
           <div class="item-info">
-            <div class="item-name">${item.name}${isLocked ? '<span class="required-pill">Required</span>' : ''}</div>
+            <div class="item-name">${item.name}${isLocked ? '<span class="required-pill">Required</span>' : ''}${naTag}</div>
             <div class="item-detail">${item.detail}${item.perStaff ? ' · ×'+s+' staff' : ''}${item.perLocation ? ' · ×'+locations()+' location'+(locations()>1?'s':'') : ''}${hasDisc ? ' · <b style="color:var(--purple-dark)">'+d+'% off</b>' : ''}</div>
           </div>
           <div class="item-pricing" onclick="event.stopPropagation()">
             ${priceHtml}
-            <div class="${chipCls}">
+            ${avail ? `<div class="${chipCls}">
               <input type="text" inputmode="numeric" ${listAttr}
                 value="${d > 0 ? d : ''}" placeholder="0"
                 title="Max for ${role()}: ${limit}%"
                 oninput="setItemDisc(${idx},'${key}',this.value)">
               <span class="pct-lbl">%</span>
             </div>
-            ${maxNote}
+            ${maxNote}` : ''}
           </div>
         </label>`;
     });
@@ -1110,6 +1198,7 @@ function buildPkgCards() {
     // ── One-time items ──
     let oHtml = '';
     Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
+      const avail    = isAvail('onetime', key);
       const checked  = pkg.onetime[key];
       const d        = pkg.discounts[key] || 0;
       const limit    = lim(key);
@@ -1117,13 +1206,15 @@ function buildPkgCards() {
 
       const isQtyItem = QTY_ITEMS.includes(key);
       const qty  = isQtyItem ? (pkg.qtys[key] || 1) : 1;
-      const rP = regO(key, pkg);
-      const nP = netO(key, pkg);
-      const hasDisc = d > 0;
+      const rP = avail ? regO(key, pkg) : 0;
+      const nP = avail ? netO(key, pkg) : 0;
+      const hasDisc = d > 0 && avail;
 
-      const priceHtml = hasDisc
-        ? `<span class="price-tag reg">${fmt(rP)}</span><span class="price-tag net">${fmt(nP)}</span>`
-        : `<span class="price-tag flat">${fmt(rP)}</span>`;
+      const priceHtml = !avail
+        ? `<span class="price-tag flat" style="color:var(--muted)">N/A</span>`
+        : hasDisc
+          ? `<span class="price-tag reg">${fmt(rP)}</span><span class="price-tag net">${fmt(nP)}</span>`
+          : `<span class="price-tag flat">${fmt(rP)}</span>`;
 
       const dlId    = DISC_LIST[key];
       const noDisc  = dlId === 'none';
@@ -1131,32 +1222,33 @@ function buildPkgCards() {
       const maxNote = exceeded ? `<span style="font-size:9px;color:var(--warning);font-weight:700;padding-left:2px;">max ${limit}%</span>` : '';
       const listAttr = dlId && !noDisc ? `list="${dlId}"` : '';
       const qtyCls  = qty > 1 ? 'qty-chip has-qty' : 'qty-chip';
+      const naTag   = !avail ? '<span class="unavail-tag">Not available</span>' : '';
 
       oHtml += `
-        <label class="item-row">
-          <input type="checkbox" ${checked ? 'checked' : ''}
+        <label class="item-row${avail ? '' : ' unavail'}">
+          <input type="checkbox" ${checked ? 'checked' : ''} ${!avail ? 'disabled' : ''}
             onchange="toggleItem(${idx},'onetime','${key}',this.checked)" onclick="event.stopPropagation()">
           <div class="item-info">
-            <div class="item-name">${item.name}</div>
+            <div class="item-name">${item.name}${naTag}</div>
             <div class="item-detail">One-time fee${isQtyItem && qty > 1 ? ' · <b style="color:var(--purple-dark)">×'+qty+'</b>' : ''}${hasDisc && !noDisc ? ' · <b style="color:var(--purple-dark)">'+d+'% off</b>' : ''}</div>
           </div>
           <div class="item-pricing" onclick="event.stopPropagation()">
             ${priceHtml}
-            ${isQtyItem ? `<div class="${qtyCls}">
+            ${avail && isQtyItem ? `<div class="${qtyCls}">
               <input type="text" inputmode="numeric" list="dl-qty"
                 value="${qty}" placeholder="1"
                 title="Number of terminals"
                 oninput="setItemQty(${idx},'${key}',this.value)">
               <span class="qty-lbl">qty</span>
             </div>` : ''}
-            ${noDisc ? '' : `<div class="${chipCls}">
+            ${avail && !noDisc ? `<div class="${chipCls}">
               <input type="text" inputmode="numeric" ${listAttr}
                 value="${d > 0 ? d : ''}" placeholder="0"
                 title="Max for ${role()}: ${limit}%"
                 oninput="setItemDisc(${idx},'${key}',this.value)">
               <span class="pct-lbl">%</span>
             </div>
-            ${maxNote}`}
+            ${maxNote}` : ''}
           </div>
         </label>`;
     });
@@ -1668,10 +1760,6 @@ function saveCurrentQuote() {
   arr.unshift(quote); // newest first
   saveAllQuotes(rep, arr);
   buildSavedQuotes();
-
-  // Auto-open the panel so rep sees their quote
-  document.getElementById('sqPanel').style.display = 'block';
-  document.getElementById('sqChevron').classList.add('open');
   showToast(`✓ Quote saved for ${company}`);
 }
 
@@ -1710,22 +1798,26 @@ function deleteQuote(id) {
   showToast('Quote deleted');
 }
 
-function toggleSavedQuotes() {
-  const panel   = document.getElementById('sqPanel');
-  const chevron = document.getElementById('sqChevron');
-  const isOpen  = panel.style.display !== 'none';
-  panel.style.display = isOpen ? 'none' : 'block';
-  chevron.classList.toggle('open', !isOpen);
+function switchTab(name) {
+  const isBuilder = name === 'builder';
+  document.getElementById('tab-builder').style.display = isBuilder ? '' : 'none';
+  document.getElementById('tab-saved').style.display   = isBuilder ? 'none' : '';
+  document.getElementById('tabBtnBuilder').classList.toggle('active', isBuilder);
+  document.getElementById('tabBtnSaved').classList.toggle('active', !isBuilder);
 }
 
 function buildSavedQuotes() {
   const rep    = getRepName();
   const arr    = rep ? loadAllQuotes(rep) : [];
-  const countEl = document.getElementById('sqCount');
+  const countEl    = document.getElementById('sqCount');
+  const countElTab = document.getElementById('sqCountTab');
   const grid    = document.getElementById('sqGrid');
-  if (!countEl || !grid) return;
+  const hint    = document.getElementById('sqRepHint');
+  if (!grid) return;
 
-  countEl.textContent = arr.length;
+  if (countEl)    countEl.textContent    = arr.length;
+  if (countElTab) countElTab.textContent = arr.length;
+  if (hint) hint.textContent = rep ? '' : 'Enter your Rep Name on the Quote Builder tab to see your saved quotes.';
 
   if (arr.length === 0) {
     grid.innerHTML = `<div class="sq-empty">No saved quotes yet — configure a package above and click <strong>💾 Save Quote</strong>.</div>`;

@@ -628,6 +628,24 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
 .tab-btn:hover { color: var(--ink); }
 .tab-btn.active { color: var(--purple); border-bottom-color: var(--purple); }
 
+/* ── Language toggle ──────────────────────────────────────────────── */
+.lang-btns { display: flex; gap: 3px; align-items: center; }
+.lbtn {
+  padding: 5px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--rsm);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  font-family: inherit;
+  background: var(--white);
+  color: var(--muted);
+  transition: all .15s;
+}
+.lbtn.active { border-color: var(--purple); background: var(--purple-light); color: var(--purple); }
+.lbtn:hover:not(.active) { border-color: var(--purple-mid); color: var(--ink); }
+
 /* ── Unavailable items (Mexico) ───────────────────────────────────── */
 .item-row.unavail {
   opacity: 0.38;
@@ -780,8 +798,14 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
     </div>
     <div class="tbl-head">
       <div>
-        <div class="tbl-title">Monthly Package Options</div>
-        <div class="tbl-for">Prepared for: <span id="prospectLbl">—</span></div>
+        <div class="tbl-title" id="proposalTitle">Monthly Package Options</div>
+        <div class="tbl-for"><span id="preparedForLbl">Prepared for:</span> <span id="prospectLbl">—</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+      <div class="lang-btns">
+        <button class="lbtn active" id="lbtnEN" onclick="setLang('en')">EN</button>
+        <button class="lbtn" id="lbtnFR" onclick="setLang('fr')">FR</button>
+        <button class="lbtn" id="lbtnES" onclick="setLang('es')">ES</button>
       </div>
       <div class="act-btns">
         <button class="btn btn-s" onclick="copyTable()">
@@ -801,22 +825,23 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
           Print / PDF
         </button>
       </div>
+      </div><!-- /lang+act wrapper -->
     </div>
 
     <table class="pt">
       <thead>
         <tr>
-          <th style="width:16%">Package</th>
-          <th style="width:37%;text-align:left">Included</th>
-          <th style="width:23%">Monthly Cost</th>
-          <th style="width:24%">One-Time Setup</th>
+          <th style="width:16%" id="thPackage">Package</th>
+          <th style="width:37%;text-align:left" id="thIncluded">Included</th>
+          <th style="width:23%" id="thMonthly">Monthly Cost</th>
+          <th style="width:24%" id="thOnetime">One-Time Setup</th>
         </tr>
       </thead>
       <tbody id="proposalBody"></tbody>
     </table>
 
     <div class="notes-area">
-      <label>Notes / Custom Terms</label>
+      <label id="notesLabel">Notes / Custom Terms</label>
       <textarea id="notesTextarea" placeholder="Contract length, payment schedule, special conditions…"></textarea>
     </div>
 
@@ -885,7 +910,8 @@ const PRICING = {
       teamConnect:  { name:'Team Connect',          price:2.95,  perStaff:true,  detail:'Per bookable team member' },
       aiConcierge:  { name:'AI Concierge',          price:99.95,  perStaff:false, perLocation:true, detail:'Per location' },
       dataConnector:{ name:'Data Connector',        price:295,    perStaff:false, perLocation:true, detail:'Per location' },
-      xeroInteg:    { name:'Xero Integration',      price:9.95,   perStaff:false, perLocation:true, detail:'Per location' },
+      xeroInteg:        { name:'Xero Integration',       price:9.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      quickbooksInteg:  { name:'QuickBooks Integration', price:9.95,  perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:199 },
@@ -905,7 +931,8 @@ const PRICING = {
       teamConnect:  { name:'Team Connect',          price:3.95,  perStaff:true,  detail:'Per bookable team member' },
       aiConcierge:  { name:'AI Concierge',          price:139.95, perStaff:false, perLocation:true, detail:'Per location' },
       dataConnector:{ name:'Data Connector',        price:305,    perStaff:false, perLocation:true, detail:'Per location' },
-      xeroInteg:    { name:'Xero Integration',      price:13.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      xeroInteg:        { name:'Xero Integration',       price:13.95, perStaff:false, perLocation:true, detail:'Per location' },
+      quickbooksInteg:  { name:'QuickBooks Integration', price:13.95, perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:249 },
@@ -925,7 +952,8 @@ const PRICING = {
       teamConnect:  { name:'Team Connect',          price:0,      perStaff:true,  detail:'Per bookable team member' },
       aiConcierge:  { name:'AI Concierge',          price:0,      perStaff:false, perLocation:true, detail:'Per location' },
       dataConnector:{ name:'Data Connector',        price:0,      perStaff:false, perLocation:true, detail:'Per location' },
-      xeroInteg:    { name:'Xero Integration',      price:0,      perStaff:false, perLocation:true, detail:'Per location' },
+      xeroInteg:        { name:'Xero Integration',       price:0, perStaff:false, perLocation:true, detail:'Per location' },
+      quickbooksInteg:  { name:'QuickBooks Integration', price:0, perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:0    },
@@ -941,7 +969,7 @@ const PRICING = {
 const MXN_AVAIL = {
   monthly: {
     subscription: true, loyalty: true, googleBoost: true, insights: true,
-    teamConnect: false, aiConcierge: false, dataConnector: false, xeroInteg: false,
+    teamConnect: false, aiConcierge: false, dataConnector: false, xeroInteg: false, quickbooksInteg: false,
   },
   onetime: {
     accountSetup: false, essentialMig: true,
@@ -963,7 +991,8 @@ const LIMITS = {
   aiConcierge:  { IC:20, TL:30, HO:40, GM:50  },
   googleBoost:  { IC:20, TL:30, HO:40, GM:50  },
   dataConnector:{ IC:20, TL:30, HO:40, GM:50  },
-  xeroInteg:    { IC:20, TL:30, HO:40, GM:50  },
+  xeroInteg:        { IC:20, TL:30, HO:40, GM:50  },
+  quickbooksInteg:  { IC:20, TL:30, HO:40, GM:50  },
   accountSetup: { IC:20, TL:30, HO:30, GM:100 },
   essentialMig: { IC:20, TL:30, HO:30, GM:100 },
   terminalS1F2: { IC:50, TL:75, HO:75, GM:100 },
@@ -979,8 +1008,9 @@ const DISC_LIST = {
   loyalty:       'dl-addon',
   aiConcierge:   'dl-addon',
   googleBoost:   'dl-addon',
-  dataConnector: 'dl-addon',
-  xeroInteg:     'dl-addon',
+  dataConnector:    'dl-addon',
+  xeroInteg:        'dl-addon',
+  quickbooksInteg:  'dl-addon',
   accountSetup:  'dl-onetime-fee',
   essentialMig:  'dl-onetime-fee',
   terminalS1F2:  'dl-onetime-fee',
@@ -997,8 +1027,9 @@ const LIMIT_LABELS = [
   { label:'AI Concierge',       key:'aiConcierge'    },
   { label:'Google Rating Boost',key:'googleBoost'    },
   { label:'Data Connector',     key:'dataConnector'  },
-  { label:'Xero Integration',   key:'xeroInteg'      },
-  { label:'Account Setup',      key:'accountSetup'   },
+  { label:'Xero Integration',      key:'xeroInteg'        },
+  { label:'QuickBooks Integration',key:'quickbooksInteg'  },
+  { label:'Account Setup',         key:'accountSetup'     },
   { label:'Data Migration',     key:'essentialMig'   },
   { label:'Terminals (S1F2/AMS1)', key:'terminalS1F2' },
   { label:'Photoshoot',         key:'photoshoot'     },
@@ -1007,10 +1038,67 @@ const LIMIT_LABELS = [
 // Items that support a quantity multiplier
 const QTY_ITEMS = ['terminalS1F2', 'terminalAMS1'];
 
+// ── Translations (proposal-facing only; builder UI stays in English) ─
+const T = {
+  en: {
+    monthlyTitle:'Monthly Package Options', preparedFor:'Prepared for:',
+    colPackage:'Package', colIncluded:'Included', colMonthly:'Monthly Cost', colOnetime:'One-Time Setup',
+    yourPrice:'Your price', regularPrice:'Regular price', youSave:'You save',
+    off:'% off', perMo:'/mo', onetime:'one-time', staff:'staff',
+    location:'location', locations:'locations',
+    setupTitle:'One-Time Setup Details', totalSetup:'Total One-Time Setup', setupItem:'Setup Item',
+    notesLabel:'Notes / Custom Terms',
+    tierBest:'Best', tierBetter:'Better', tierGood:'Good',
+    name_subscription:'Fresha Subscription', name_loyalty:'Client Loyalty',
+    name_googleBoost:'Google Rating Boost', name_insights:'Insights',
+    name_teamConnect:'Team Connect', name_aiConcierge:'AI Concierge',
+    name_dataConnector:'Data Connector', name_xeroInteg:'Xero Integration', name_quickbooksInteg:'QuickBooks Integration',
+    name_accountSetup:'Account Setup', name_essentialMig:'Essential Data Migration',
+    name_terminalS1F2:'Terminal – S1F2', name_terminalAMS1:'Terminal – AMS1',
+    name_photoshoot:'Photoshoot (1 Hour)',
+  },
+  fr: {
+    monthlyTitle:'Options de forfait mensuel', preparedFor:'Préparé pour :',
+    colPackage:'Forfait', colIncluded:'Inclus', colMonthly:'Coût mensuel', colOnetime:'Frais initiaux',
+    yourPrice:'Votre prix', regularPrice:'Prix habituel', youSave:'Économies :',
+    off:'% de rabais', perMo:'/mois', onetime:'unique', staff:'employés',
+    location:'établissement', locations:'établissements',
+    setupTitle:'Détails des frais initiaux', totalSetup:'Total des frais initiaux', setupItem:'Poste',
+    notesLabel:'Notes / Conditions particulières',
+    tierBest:'Premium', tierBetter:'Avancé', tierGood:'Essentiel',
+    name_subscription:'Abonnement Fresha', name_loyalty:'Fidélité client',
+    name_googleBoost:'Boost d\'avis Google', name_insights:'Insights',
+    name_teamConnect:'Team Connect', name_aiConcierge:'Conciergerie IA',
+    name_dataConnector:'Connecteur de données', name_xeroInteg:'Intégration Xero', name_quickbooksInteg:'Intégration QuickBooks',
+    name_accountSetup:'Configuration du compte', name_essentialMig:'Migration de données',
+    name_terminalS1F2:'Terminal – S1F2', name_terminalAMS1:'Terminal – AMS1',
+    name_photoshoot:'Séance photo (1 heure)',
+  },
+  es: {
+    monthlyTitle:'Opciones de paquete mensual', preparedFor:'Preparado para:',
+    colPackage:'Paquete', colIncluded:'Incluido', colMonthly:'Costo mensual', colOnetime:'Configuración inicial',
+    yourPrice:'Su precio', regularPrice:'Precio regular', youSave:'Ahorra:',
+    off:'% de descuento', perMo:'/mes', onetime:'único', staff:'empleados',
+    location:'sucursal', locations:'sucursales',
+    setupTitle:'Detalles de configuración inicial', totalSetup:'Total configuración inicial', setupItem:'Concepto',
+    notesLabel:'Notas / Condiciones especiales',
+    tierBest:'Completo', tierBetter:'Avanzado', tierGood:'Básico',
+    name_subscription:'Suscripción Fresha', name_loyalty:'Lealtad de clientes',
+    name_googleBoost:'Impulso de calificación Google', name_insights:'Insights',
+    name_teamConnect:'Team Connect', name_aiConcierge:'Conserje IA',
+    name_dataConnector:'Conector de datos', name_xeroInteg:'Integración Xero', name_quickbooksInteg:'Integración QuickBooks',
+    name_accountSetup:'Configuración de cuenta', name_essentialMig:'Migración de datos esencial',
+    name_terminalS1F2:'Terminal – S1F2', name_terminalAMS1:'Terminal – AMS1',
+    name_photoshoot:'Sesión fotográfica (1 hora)',
+  },
+};
+
+function t(key) { return (T[lang] || T.en)[key] || key; }
+
 // Factory for a fresh discounts object (all zeros)
 function freshDiscs() {
   return {
-    subscription:0, insights:0, teamConnect:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0, xeroInteg:0,
+    subscription:0, insights:0, teamConnect:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0, xeroInteg:0, quickbooksInteg:0,
     accountSetup:0, essentialMig:0, terminalS1F2:0, terminalAMS1:0, photoshoot:0,
   };
 }
@@ -1022,24 +1110,25 @@ function freshQtys() {
 
 // ── State ──────────────────────────────────────────────────────────
 let region = 'USA';
+let lang   = 'en';
 
 // Each package has its own discounts object
 let pkgState = [
   {
     name:'Fully Loaded', tier:'best', tierLabel:'Best', visible:true,
-    monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false },
+    monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false, quickbooksInteg:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Loyalty & Growth', tier:'better', tierLabel:'Better', visible:true,
-    monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false },
+    monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false, quickbooksInteg:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Basic', tier:'good', tierLabel:'Good', visible:true,
-    monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false },
+    monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false, quickbooksInteg:false },
     onetime: { accountSetup:true,  essentialMig:false, terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
@@ -1098,6 +1187,25 @@ function setRegion(r) {
   document.getElementById('btnCAN').classList.toggle('active', r==='CAN');
   document.getElementById('btnMXN').classList.toggle('active', r==='MXN');
   update();
+}
+
+function setLang(l) {
+  lang = l;
+  ['en','fr','es'].forEach(x => {
+    const b = document.getElementById('lbtn'+x.toUpperCase());
+    if (b) b.classList.toggle('active', x === l);
+  });
+  // Update static proposal-card labels
+  const set = (id, key) => { const el = document.getElementById(id); if (el) el.textContent = t(key); };
+  set('proposalTitle',  'monthlyTitle');
+  set('preparedForLbl', 'preparedFor');
+  set('thPackage',      'colPackage');
+  set('thIncluded',     'colIncluded');
+  set('thMonthly',      'colMonthly');
+  set('thOnetime',      'colOnetime');
+  set('notesLabel',     'notesLabel');
+  localStorage.setItem('freshaLang', l);
+  buildProposalTable();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1405,56 +1513,62 @@ function buildProposalTable() {
     const anyOD = nO < rO - 0.001;
 
     // Included list
+    const tierT = { best:t('tierBest'), better:t('tierBetter'), good:t('tierGood') };
     let inc = '<ul class="inc-list">';
     Object.entries(PRICING[region].monthly).forEach(([key, item]) => {
-      if (!pkg.monthly[key]) return;
+      if (!pkg.monthly[key] || !isAvail('monthly', key)) return;
       const d  = pkg.discounts[key] || 0;
-      const de = item.perStaff ? ` – ${s} staff` : item.perLocation ? ` – ${locations()} location${locations()>1?'s':''}` : '';
+      const lc = locations();
+      const de = item.perStaff
+        ? ` – ${s} ${t('staff')}`
+        : item.perLocation
+          ? ` – ${lc} ${lc > 1 ? t('locations') : t('location')}`
+          : '';
       const dn = d > 0
-        ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">(${d}% off)</span>` : '';
-      inc += `<li>${item.name}${de}${dn}</li>`;
+        ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">(${d}${t('off')})</span>` : '';
+      inc += `<li>${t('name_'+key)}${de}${dn}</li>`;
     });
     Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
-      if (!pkg.onetime[key]) return;
+      if (!pkg.onetime[key] || !isAvail('onetime', key)) return;
       const d   = pkg.discounts[key] || 0;
       const qty = QTY_ITEMS.includes(key) ? (pkg.qtys[key] || 1) : 1;
       const dq  = qty > 1 ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">×${qty}</span>` : '';
-      const dn  = d > 0 ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">(${d}% off)</span>` : '';
-      inc += `<li>${item.name}${dq} <span style="color:var(--muted);font-size:11px">(one-time)</span>${dn}</li>`;
+      const dn  = d > 0 ? ` <span style="color:var(--purple);font-size:11px;font-weight:700">(${d}${t('off')})</span>` : '';
+      inc += `<li>${t('name_'+key)}${dq} <span style="color:var(--muted);font-size:11px">(${t('onetime')})</span>${dn}</li>`;
     });
     inc += '</ul>';
 
-    // Monthly cell — always shows both Your Price and Regular Price
+    // Monthly cell
     const mSavePct = rM > 0 ? Math.round((mSave / rM) * 100) : 0;
     const mCell = anyMD
-      ? `<span class="p-your-lbl">Your price</span>
-         <span class="p-offer">${fmt(nM)}<span class="p-sub">/mo</span></span>
-         <span class="p-reg-row"><span class="p-reg-lbl">Regular price</span> <s>${fmt(rM)}/mo</s></span>
-         <span class="p-save">You save ${fmt(mSave)}/mo</span>
-         <span class="p-save-pct">${mSavePct}% off</span>`
-      : `<span class="p-your-lbl">Your price</span>
-         <span class="p-offer">${fmt(rM)}<span class="p-sub">/mo</span></span>`;
+      ? `<span class="p-your-lbl">${t('yourPrice')}</span>
+         <span class="p-offer">${fmt(nM)}<span class="p-sub">${t('perMo')}</span></span>
+         <span class="p-reg-row"><span class="p-reg-lbl">${t('regularPrice')}</span> <s>${fmt(rM)}${t('perMo')}</s></span>
+         <span class="p-save">${t('youSave')} ${fmt(mSave)}${t('perMo')}</span>
+         <span class="p-save-pct">${mSavePct}${t('off')}</span>`
+      : `<span class="p-your-lbl">${t('yourPrice')}</span>
+         <span class="p-offer">${fmt(rM)}<span class="p-sub">${t('perMo')}</span></span>`;
 
-    // One-time cell — always shows both Your Price and Regular Price
+    // One-time cell
     const oSavePct = rO > 0 ? Math.round((oSave / rO) * 100) : 0;
     let oCell = '';
     if (rO === 0) {
       oCell = `<span class="p-dash">—</span>`;
     } else if (anyOD) {
-      oCell = `<span class="p-your-lbl">Your price</span>
+      oCell = `<span class="p-your-lbl">${t('yourPrice')}</span>
                <span class="p-offer">${fmt(nO)}</span>
-               <span class="p-reg-row"><span class="p-reg-lbl">Regular price</span> <s>${fmt(rO)}</s></span>
-               <span class="p-save">You save ${fmt(oSave)}</span>
-               <span class="p-save-pct">${oSavePct}% off</span>`;
+               <span class="p-reg-row"><span class="p-reg-lbl">${t('regularPrice')}</span> <s>${fmt(rO)}</s></span>
+               <span class="p-save">${t('youSave')} ${fmt(oSave)}</span>
+               <span class="p-save-pct">${oSavePct}${t('off')}</span>`;
     } else {
-      oCell = `<span class="p-your-lbl">Your price</span>
+      oCell = `<span class="p-your-lbl">${t('yourPrice')}</span>
                <span class="p-offer">${fmt(rO)}</span>`;
     }
 
     html += `
       <tr class="${pkg.tier==='best' ? 'rec' : ''}">
         <td>
-          <span class="pkg-tag ${tagCls[pkg.tier]}">${pkg.tierLabel}</span><br>
+          <span class="pkg-tag ${tagCls[pkg.tier]}">${tierT[pkg.tier] || pkg.tierLabel}</span><br>
           <span class="pkg-tname">${pkg.name || '—'}</span>
         </td>
         <td>${inc}</td>
@@ -1476,24 +1590,26 @@ function copyTable() {
     .filter(p => p.visible !== false)
     .sort((a,b) => ({best:0,better:1,good:2}[a.tier] - {best:0,better:1,good:2}[b.tier]));
 
-  let txt = `MONTHLY PACKAGE OPTIONS${name ? ' — '+name.toUpperCase() : ''}\n${'─'.repeat(65)}\n`;
+  const tierT = { best:t('tierBest'), better:t('tierBetter'), good:t('tierGood') };
+  let txt = `${t('monthlyTitle').toUpperCase()}${name ? ' — '+name.toUpperCase() : ''}\n${'─'.repeat(65)}\n`;
   ordered.forEach(pkg => {
     const { rM, nM, rO, nO } = pkgTotals(pkg, s);
-    txt += `\n[${pkg.tierLabel.toUpperCase()}] ${pkg.name}\nIncluded:\n`;
+    const lc = locations();
+    txt += `\n[${(tierT[pkg.tier]||pkg.tierLabel).toUpperCase()}] ${pkg.name}\n${t('colIncluded')}:\n`;
     Object.entries(PRICING[region].monthly).forEach(([key, item]) => {
-      if (!pkg.monthly[key]) return;
+      if (!pkg.monthly[key] || !isAvail('monthly', key)) return;
       const d = pkg.discounts[key] || 0;
-      const locStr = item.perLocation ? ` (${locations()} location${locations()>1?'s':''})` : '';
-      txt += `  • ${item.name}${item.perStaff ? ` (${s} staff)` : locStr}${d>0 ? ` — ${d}% off` : ''}\n`;
+      const locStr = item.perLocation ? ` (${lc} ${lc>1?t('locations'):t('location')})` : '';
+      txt += `  • ${t('name_'+key)}${item.perStaff ? ` (${s} ${t('staff')})` : locStr}${d>0 ? ` — ${d}${t('off')}` : ''}\n`;
     });
     Object.entries(PRICING[region].onetime).forEach(([key, item]) => {
-      if (!pkg.onetime[key]) return;
+      if (!pkg.onetime[key] || !isAvail('onetime', key)) return;
       const d   = pkg.discounts[key] || 0;
       const qty = QTY_ITEMS.includes(key) ? (pkg.qtys[key] || 1) : 1;
-      txt += `  • ${item.name}${qty > 1 ? ` ×${qty}` : ''} (one-time)${d>0 ? ` — ${d}% off` : ''}\n`;
+      txt += `  • ${t('name_'+key)}${qty > 1 ? ` ×${qty}` : ''} (${t('onetime')})${d>0 ? ` — ${d}${t('off')}` : ''}\n`;
     });
-    txt += `Monthly: ${fmt(rM)}/mo${nM < rM-0.001 ? ` → ${fmt(nM)}/mo (discounted)` : ''}\n`;
-    txt += `One-Time: ${rO > 0 ? fmt(nO < rO-0.001 ? nO : rO) : '—'}\n${'─'.repeat(65)}\n`;
+    txt += `${t('colMonthly')}: ${fmt(rM)}${t('perMo')}${nM < rM-0.001 ? ` → ${fmt(nM)}${t('perMo')}` : ''}\n`;
+    txt += `${t('colOnetime')}: ${rO > 0 ? fmt(nO < rO-0.001 ? nO : rO) : '—'}\n${'─'.repeat(65)}\n`;
   });
   navigator.clipboard.writeText(txt).then(() => showToast('✓ Table copied to clipboard'));
 }
@@ -1567,10 +1683,11 @@ function buildSetupDetailsEl(s, name) {
 
   const colPct = Math.round(65 / (ordered.length || 1));
 
+  const tierT = { best:'★ '+t('tierBest'), better:t('tierBetter'), good:t('tierGood') };
   let thead = `<tr style="background:#1a1a1a;">
-    <th style="padding:13px 18px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.8);width:35%">Setup Item</th>`;
+    <th style="padding:13px 18px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.8);width:35%">${t('setupItem')}</th>`;
   ordered.forEach(pkg => {
-    const tl = pkg.tier === 'best' ? '★ Best' : pkg.tier === 'better' ? 'Better' : 'Good';
+    const tl = tierT[pkg.tier] || pkg.tierLabel;
     thead += `<th style="padding:13px 18px;text-align:right;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.8);width:${colPct}%">
       <span style="font-size:9px;font-weight:700;color:${pkg.tier==='best'?'#b4a7ff':'#888'};display:block;margin-bottom:2px;">${tl}</span>
       ${pkg.name || '—'}
@@ -1586,8 +1703,8 @@ function buildSetupDetailsEl(s, name) {
     rowIdx++;
     tbody += `<tr style="border-bottom:1px solid #e5e7eb;">
       <td style="background:${bg};padding:14px 18px;vertical-align:middle;">
-        <div style="font-size:13px;font-weight:700;color:#1a1a1a;">${item.name}</div>
-        <div style="font-size:11px;color:#6b7280;margin-top:2px;">One-time fee${QTY_ITEMS.includes(key) && ordered.some(p=>p.onetime[key]&&(p.qtys[key]||1)>1) ? ' · qty varies by package' : ''}</div>
+        <div style="font-size:13px;font-weight:700;color:#1a1a1a;">${t('name_'+key)}</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:2px;">${t('onetime')}${QTY_ITEMS.includes(key) && ordered.some(p=>p.onetime[key]&&(p.qtys[key]||1)>1) ? ' · qty' : ''}</div>
       </td>`;
     ordered.forEach(pkg => {
       const cellBg = pkg.tier === 'best' ? '#f0edff' : bg;
@@ -1601,14 +1718,14 @@ function buildSetupDetailsEl(s, name) {
       const nP  = netO(key, pkg);
       if (d > 0) {
         tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;">
-          <div style="font-size:9px;font-weight:700;color:#6B4EFF;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Your price</div>
+          <div style="font-size:9px;font-weight:700;color:#6B4EFF;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">${t('yourPrice')}</div>
           <div style="font-size:20px;font-weight:800;color:#1a1a1a;">${fmt(nP)}</div>
           <div style="font-size:11px;color:#9ca3af;text-decoration:line-through;margin-top:1px;">Regular: ${fmt(rP)}</div>
           <div style="font-size:11px;font-weight:700;color:#6B4EFF;margin-top:2px;">${d}% off · save ${fmt(rP - nP)}</div>
         </td>`;
       } else {
         tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;">
-          <div style="font-size:9px;font-weight:700;color:#6B4EFF;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Your price</div>
+          <div style="font-size:9px;font-weight:700;color:#6B4EFF;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">${t('yourPrice')}</div>
           <div style="font-size:20px;font-weight:800;color:#1a1a1a;">${fmt(rP)}</div>
         </td>`;
       }
@@ -1618,7 +1735,7 @@ function buildSetupDetailsEl(s, name) {
 
   // Totals row
   tbody += `<tr>
-    <td style="background:#f3f4f6;padding:14px 18px;vertical-align:middle;font-size:12px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:.5px;border-top:2px solid #e5e7eb;">Total One-Time Setup</td>`;
+    <td style="background:#f3f4f6;padding:14px 18px;vertical-align:middle;font-size:12px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:.5px;border-top:2px solid #e5e7eb;">${t('totalSetup')}</td>`;
   ordered.forEach(pkg => {
     const { rO: tRO, nO: tNO } = pkgTotals(pkg, s);
     const cellBg  = pkg.tier === 'best' ? '#e8e3ff' : '#f3f4f6';
@@ -1628,7 +1745,7 @@ function buildSetupDetailsEl(s, name) {
     } else if (hasOD) {
       tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;border-top:2px solid #e5e7eb;">
         <div style="font-size:20px;font-weight:800;color:#1a1a1a;">${fmt(tNO)}</div>
-        <div style="font-size:11px;color:#9ca3af;text-decoration:line-through;margin-top:1px;">Regular: ${fmt(tRO)}</div>
+        <div style="font-size:11px;color:#9ca3af;text-decoration:line-through;margin-top:1px;">${t('regularPrice')}: ${fmt(tRO)}</div>
       </td>`;
     } else {
       tbody += `<td style="background:${cellBg};padding:14px 18px;text-align:right;vertical-align:middle;font-size:20px;font-weight:800;color:#1a1a1a;border-top:2px solid #e5e7eb;">${fmt(tRO)}</td>`;
@@ -1640,8 +1757,8 @@ function buildSetupDetailsEl(s, name) {
   div.style.cssText = 'position:fixed;left:-9999px;top:0;width:1200px;background:#ffffff;font-family:Inter,Arial,sans-serif;border-radius:12px;overflow:hidden;';
   div.innerHTML = `
     <div style="padding:22px 24px 18px;border-bottom:1px solid #e5e7eb;background:#fff;">
-      <div style="font-size:22px;font-weight:800;color:#1a1a1a;line-height:1.2;">One-Time Setup Details</div>
-      ${name ? `<div style="font-size:13px;color:#6b7280;margin-top:4px;">Prepared for: <strong style="color:#1a1a1a;">${name}</strong></div>` : ''}
+      <div style="font-size:22px;font-weight:800;color:#1a1a1a;line-height:1.2;">${t('setupTitle')}</div>
+      ${name ? `<div style="font-size:13px;color:#6b7280;margin-top:4px;">${t('preparedFor')} <strong style="color:#1a1a1a;">${name}</strong></div>` : ''}
     </div>
     <table style="width:100%;border-collapse:collapse;">
       <thead>${thead}</thead>
@@ -1878,10 +1995,12 @@ function update() {
   buildProposalTable();
 }
 
-// Restore rep name from last session
+// Restore rep name and language from last session
 (function() {
-  const saved = localStorage.getItem('freshaRepName');
-  if (saved) document.getElementById('repName').value = saved;
+  const savedRep  = localStorage.getItem('freshaRepName');
+  if (savedRep) document.getElementById('repName').value = savedRep;
+  const savedLang = localStorage.getItem('freshaLang');
+  if (savedLang && T[savedLang]) setLang(savedLang);
 })();
 
 update();

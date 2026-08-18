@@ -949,11 +949,11 @@ const PRICING = {
       loyalty:      { name:'Client Loyalty',        price:950,    perStaff:false, perLocation:true, detail:'Per location' },
       googleBoost:  { name:'Google Rating Boost',   price:164.95, perStaff:false, perLocation:true, detail:'Per location' },
       insights:     { name:'Insights',              price:100,    perStaff:true,  detail:'Per bookable team member' },
-      teamConnect:  { name:'Team Connect',          price:0,      perStaff:true,  detail:'Per bookable team member' },
+      teamConnect:  { name:'Team Connect',          price:49.95,  perStaff:true,  detail:'Per bookable team member' },
       aiConcierge:  { name:'AI Concierge',          price:0,      perStaff:false, perLocation:true, detail:'Per location' },
-      dataConnector:{ name:'Data Connector',        price:0,      perStaff:false, perLocation:true, detail:'Per location' },
-      xeroInteg:        { name:'Xero Integration',       price:0, perStaff:false, perLocation:true, detail:'Per location' },
-      quickbooksInteg:  { name:'QuickBooks Integration', price:0, perStaff:false, perLocation:true, detail:'Per location' },
+      dataConnector:{ name:'Data Connector',        price:2800,   perStaff:false, perLocation:true, detail:'Per location' },
+      xeroInteg:        { name:'Xero Integration',       price:176, perStaff:false, perLocation:true, detail:'Per location' },
+      quickbooksInteg:  { name:'QuickBooks Integration', price:0,   perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:0    },
@@ -969,7 +969,7 @@ const PRICING = {
 const MXN_AVAIL = {
   monthly: {
     subscription: true, loyalty: true, googleBoost: true, insights: true,
-    teamConnect: false, aiConcierge: false, dataConnector: false, xeroInteg: false, quickbooksInteg: false,
+    teamConnect: true, aiConcierge: false, dataConnector: true, xeroInteg: true, quickbooksInteg: false,
   },
   onetime: {
     accountSetup: false, essentialMig: true,
@@ -1083,7 +1083,7 @@ const T = {
     setupTitle:'Detalles de configuración inicial', totalSetup:'Total configuración inicial', setupItem:'Concepto',
     notesLabel:'Notas / Condiciones especiales',
     tierBest:'Completo', tierBetter:'Avanzado', tierGood:'Básico',
-    name_subscription:'Suscripción Fresha', name_loyalty:'Lealtad de clientes',
+    name_subscription:'Suscripción Fresha', name_loyalty:'Programa de Lealtad',
     name_googleBoost:'Impulso de calificación Google', name_insights:'Insights',
     name_teamConnect:'Team Connect', name_aiConcierge:'Conserje IA',
     name_dataConnector:'Conector de datos', name_xeroInteg:'Integración Xero', name_quickbooksInteg:'Integración QuickBooks',

@@ -866,6 +866,10 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
       <option value="40">40%</option>
       <option value="50">50%</option>
     </datalist>
+    <datalist id="dl-ai-concierge">
+      <option value="0">0%</option>
+      <option value="10">10%</option>
+    </datalist>
     <datalist id="dl-onetime-fee">
       <option value="0">0%</option>
       <option value="10">10%</option>
@@ -988,7 +992,7 @@ const LIMITS = {
   insights:     { IC:20, TL:30, HO:40, GM:50  },
   teamConnect:  { IC:20, TL:30, HO:40, GM:50  },
   loyalty:      { IC:20, TL:30, HO:40, GM:50  },
-  aiConcierge:  { IC:20, TL:30, HO:40, GM:50  },
+  aiConcierge:  { IC:10, TL:10, HO:10, GM:10  },
   googleBoost:  { IC:20, TL:30, HO:40, GM:50  },
   dataConnector:{ IC:20, TL:30, HO:40, GM:50  },
   xeroInteg:        { IC:20, TL:30, HO:40, GM:50  },
@@ -1006,7 +1010,7 @@ const DISC_LIST = {
   insights:      'dl-addon',
   teamConnect:   'dl-addon',
   loyalty:       'dl-addon',
-  aiConcierge:   'dl-addon',
+  aiConcierge:   'dl-ai-concierge',
   googleBoost:   'dl-addon',
   dataConnector:    'dl-addon',
   xeroInteg:        'dl-addon',
@@ -1432,7 +1436,9 @@ function setItemQty(idx, key, val) {
 }
 
 function setItemDisc(idx, key, val) {
-  pkgState[idx].discounts[key] = parseFloat(val) || 0;
+  let v = parseFloat(val) || 0;
+  if (key === 'aiConcierge') v = Math.min(v, 10);
+  pkgState[idx].discounts[key] = v;
   // Partial refresh: just update footer + proposal table to avoid losing focus
   refreshPkgFooter(idx);
   buildProposalTable();

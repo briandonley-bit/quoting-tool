@@ -866,10 +866,6 @@ footer { text-align: center; color: var(--muted); font-size: 12px; padding: 10px
       <option value="40">40%</option>
       <option value="50">50%</option>
     </datalist>
-    <datalist id="dl-ai-concierge">
-      <option value="0">0%</option>
-      <option value="10">10%</option>
-    </datalist>
     <datalist id="dl-onetime-fee">
       <option value="0">0%</option>
       <option value="10">10%</option>
@@ -916,6 +912,7 @@ const PRICING = {
       dataConnector:{ name:'Data Connector',        price:295,    perStaff:false, perLocation:true, detail:'Per location' },
       xeroInteg:        { name:'Xero Integration',       price:9.95,  perStaff:false, perLocation:true, detail:'Per location' },
       quickbooksInteg:  { name:'QuickBooks Integration', price:9.95,  perStaff:false, perLocation:true, detail:'Per location' },
+      websiteBuilder:   { name:'Website Builder',        price:22.95, perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:199 },
@@ -937,6 +934,7 @@ const PRICING = {
       dataConnector:{ name:'Data Connector',        price:305,    perStaff:false, perLocation:true, detail:'Per location' },
       xeroInteg:        { name:'Xero Integration',       price:13.95, perStaff:false, perLocation:true, detail:'Per location' },
       quickbooksInteg:  { name:'QuickBooks Integration', price:13.95, perStaff:false, perLocation:true, detail:'Per location' },
+      websiteBuilder:   { name:'Website Builder',        price:22.95, perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:249 },
@@ -958,6 +956,7 @@ const PRICING = {
       dataConnector:{ name:'Data Connector',        price:2800,   perStaff:false, perLocation:true, detail:'Per location' },
       xeroInteg:        { name:'Xero Integration',       price:176, perStaff:false, perLocation:true, detail:'Per location' },
       quickbooksInteg:  { name:'QuickBooks Integration', price:0,   perStaff:false, perLocation:true, detail:'Per location' },
+      websiteBuilder:   { name:'Website Builder',        price:0,   perStaff:false, perLocation:true, detail:'Per location' },
     },
     onetime:{
       accountSetup: { name:'Account Setup',            price:0    },
@@ -973,7 +972,7 @@ const PRICING = {
 const MXN_AVAIL = {
   monthly: {
     subscription: true, loyalty: true, googleBoost: true, insights: true,
-    teamConnect: true, aiConcierge: false, dataConnector: true, xeroInteg: true, quickbooksInteg: false,
+    teamConnect: true, aiConcierge: false, dataConnector: true, xeroInteg: true, quickbooksInteg: false, websiteBuilder: false,
   },
   onetime: {
     accountSetup: false, essentialMig: true,
@@ -992,11 +991,12 @@ const LIMITS = {
   insights:     { IC:20, TL:30, HO:40, GM:50  },
   teamConnect:  { IC:20, TL:30, HO:40, GM:50  },
   loyalty:      { IC:20, TL:30, HO:40, GM:50  },
-  aiConcierge:  { IC:10, TL:10, HO:10, GM:10  },
+  aiConcierge:  { IC:20, TL:30, HO:40, GM:50  },
   googleBoost:  { IC:20, TL:30, HO:40, GM:50  },
   dataConnector:{ IC:20, TL:30, HO:40, GM:50  },
   xeroInteg:        { IC:20, TL:30, HO:40, GM:50  },
   quickbooksInteg:  { IC:20, TL:30, HO:40, GM:50  },
+  websiteBuilder:   { IC:20, TL:30, HO:40, GM:50  },
   accountSetup: { IC:20, TL:30, HO:30, GM:100 },
   essentialMig: { IC:20, TL:30, HO:30, GM:100 },
   terminalS1F2: { IC:50, TL:75, HO:75, GM:100 },
@@ -1010,11 +1010,12 @@ const DISC_LIST = {
   insights:      'dl-addon',
   teamConnect:   'dl-addon',
   loyalty:       'dl-addon',
-  aiConcierge:   'dl-ai-concierge',
+  aiConcierge:   'dl-addon',
   googleBoost:   'dl-addon',
   dataConnector:    'dl-addon',
   xeroInteg:        'dl-addon',
   quickbooksInteg:  'dl-addon',
+  websiteBuilder:   'dl-addon',
   accountSetup:  'dl-onetime-fee',
   essentialMig:  'dl-onetime-fee',
   terminalS1F2:  'dl-onetime-fee',
@@ -1033,6 +1034,7 @@ const LIMIT_LABELS = [
   { label:'Data Connector',     key:'dataConnector'  },
   { label:'Xero Integration',      key:'xeroInteg'        },
   { label:'QuickBooks Integration',key:'quickbooksInteg'  },
+  { label:'Website Builder',       key:'websiteBuilder'   },
   { label:'Account Setup',         key:'accountSetup'     },
   { label:'Data Migration',     key:'essentialMig'   },
   { label:'Terminals (S1F2/AMS1)', key:'terminalS1F2' },
@@ -1056,7 +1058,7 @@ const T = {
     name_subscription:'Fresha Subscription', name_loyalty:'Client Loyalty',
     name_googleBoost:'Google Rating Boost', name_insights:'Insights',
     name_teamConnect:'Team Connect', name_aiConcierge:'AI Concierge',
-    name_dataConnector:'Data Connector', name_xeroInteg:'Xero Integration', name_quickbooksInteg:'QuickBooks Integration',
+    name_dataConnector:'Data Connector', name_xeroInteg:'Xero Integration', name_quickbooksInteg:'QuickBooks Integration', name_websiteBuilder:'Website Builder',
     name_accountSetup:'Account Setup', name_essentialMig:'Essential Data Migration',
     name_terminalS1F2:'Terminal – S1F2', name_terminalAMS1:'Terminal – AMS1',
     name_photoshoot:'Photoshoot (1 Hour)',
@@ -1073,7 +1075,7 @@ const T = {
     name_subscription:'Abonnement Fresha', name_loyalty:'Fidélité client',
     name_googleBoost:'Boost d\'avis Google', name_insights:'Insights',
     name_teamConnect:'Team Connect', name_aiConcierge:'Conciergerie IA',
-    name_dataConnector:'Connecteur de données', name_xeroInteg:'Intégration Xero', name_quickbooksInteg:'Intégration QuickBooks',
+    name_dataConnector:'Connecteur de données', name_xeroInteg:'Intégration Xero', name_quickbooksInteg:'Intégration QuickBooks', name_websiteBuilder:'Créateur de site Web',
     name_accountSetup:'Configuration du compte', name_essentialMig:'Migration de données',
     name_terminalS1F2:'Terminal – S1F2', name_terminalAMS1:'Terminal – AMS1',
     name_photoshoot:'Séance photo (1 heure)',
@@ -1090,7 +1092,7 @@ const T = {
     name_subscription:'Suscripción Fresha', name_loyalty:'Programa de Lealtad',
     name_googleBoost:'Impulso de calificación Google', name_insights:'Insights',
     name_teamConnect:'Team Connect', name_aiConcierge:'Conserje IA',
-    name_dataConnector:'Conector de datos', name_xeroInteg:'Integración Xero', name_quickbooksInteg:'Integración QuickBooks',
+    name_dataConnector:'Conector de datos', name_xeroInteg:'Integración Xero', name_quickbooksInteg:'Integración QuickBooks', name_websiteBuilder:'Creador de sitios web',
     name_accountSetup:'Configuración de cuenta', name_essentialMig:'Migración de datos esencial',
     name_terminalS1F2:'Terminal – S1F2', name_terminalAMS1:'Terminal – AMS1',
     name_photoshoot:'Sesión fotográfica (1 hora)',
@@ -1102,7 +1104,7 @@ function t(key) { return (T[lang] || T.en)[key] || key; }
 // Factory for a fresh discounts object (all zeros)
 function freshDiscs() {
   return {
-    subscription:0, insights:0, teamConnect:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0, xeroInteg:0, quickbooksInteg:0,
+    subscription:0, insights:0, teamConnect:0, loyalty:0, aiConcierge:0, googleBoost:0, dataConnector:0, xeroInteg:0, quickbooksInteg:0, websiteBuilder:0,
     accountSetup:0, essentialMig:0, terminalS1F2:0, terminalAMS1:0, photoshoot:0,
   };
 }
@@ -1120,19 +1122,19 @@ let lang   = 'en';
 let pkgState = [
   {
     name:'Fully Loaded', tier:'best', tierLabel:'Best', visible:true,
-    monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false, quickbooksInteg:false },
+    monthly: { subscription:true,  insights:true,  loyalty:true,  aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false, quickbooksInteg:false, websiteBuilder:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Loyalty & Growth', tier:'better', tierLabel:'Better', visible:true,
-    monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false, quickbooksInteg:false },
+    monthly: { subscription:true,  insights:true,  loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false, quickbooksInteg:false, websiteBuilder:false },
     onetime: { accountSetup:true,  essentialMig:true,  terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
   {
     name:'Basic', tier:'good', tierLabel:'Good', visible:true,
-    monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false, quickbooksInteg:false },
+    monthly: { subscription:true,  insights:false, loyalty:false, aiConcierge:false, teamConnect:false, googleBoost:false, dataConnector:false, xeroInteg:false, quickbooksInteg:false, websiteBuilder:false },
     onetime: { accountSetup:true,  essentialMig:false, terminalS1F2:false, terminalAMS1:false, photoshoot:false },
     discounts: freshDiscs(), qtys: freshQtys(),
   },
@@ -1436,9 +1438,7 @@ function setItemQty(idx, key, val) {
 }
 
 function setItemDisc(idx, key, val) {
-  let v = parseFloat(val) || 0;
-  if (key === 'aiConcierge') v = Math.min(v, 10);
-  pkgState[idx].discounts[key] = v;
+  pkgState[idx].discounts[key] = parseFloat(val) || 0;
   // Partial refresh: just update footer + proposal table to avoid losing focus
   refreshPkgFooter(idx);
   buildProposalTable();
